@@ -33,19 +33,19 @@ d3.tsv("data/nat2016.txt", rowNatConverter, function(error, data) {
 
   //get population per year
 
-    var tmpDataGrp = d3.nest()
-      .key(function(d) {
-        return d.annais;
-      })
-      .rollup(function(d) {
-        // sum up population for each year
-        var sumPop = d3.sum(d, function(g) {
-          return g.r;
-        });
-        // sum of the circles use the same area as a square (notwithstanding space loss)
-        return Math.sqrt((w * h) / (Math.PI * sumPop));
+  var tmpDataGrp = d3.nest()
+    .key(function(d) {
+      return d.annais;
+    })
+    .rollup(function(d) {
+      // sum up population for each year
+      var sumPop = d3.sum(d, function(g) {
+        return g.r;
+      });
+      // sum of the circles use the same area as a square (notwithstanding space loss)
+      return Math.sqrt((w * h) / (Math.PI * sumPop));
 
-      }).entries(data);
+    }).entries(data);
 
   //dictionary
   for (var i = 0; i < tmpDataGrp.length; i++) {
@@ -77,16 +77,17 @@ d3.tsv("data/nat2016.txt", rowNatConverter, function(error, data) {
   //  .domain([0, max_population])
   //  .range([0.1, radius]);
 
-  var groupBubbles = svgContainer.append("g")
-    .selectAll("circle")
-    .data(circles)
+  var node = svgContainer
+    .selectAll("g.node")
+    .data(circles);
+
+  var groupBubbles = node
     .enter()
     .append("g")
-    .attr("transform", "translate(400,400)")
+    .attr("transform", "translate(" + w / 2 + "," + h / 2 + ")")
 
   var bubbles = groupBubbles.append("circle")
     .style("fill", function(d) {
-
       return color(d.angle = Math.atan2(d.y, d.x));
     })
     .attr("cx", function(d) {
@@ -98,7 +99,7 @@ d3.tsv("data/nat2016.txt", rowNatConverter, function(error, data) {
     //.attr("r", function(d) {
     //  return d.r - 0.25;
     .attr("r", function(d) {
-      return d.r - 0.25
+      return d.r //- 0.25
     })
   //.attr("fill", "blue")
 
@@ -107,12 +108,23 @@ d3.tsv("data/nat2016.txt", rowNatConverter, function(error, data) {
   groupBubbles.append("title")
     //  .attr("text-anchor", "middle")
     .text(function(d) {
-      return d.preusuel;
+      return d.preusuel + " : " + d.nombre;
     })
 
   groupBubbles.append("text")
-    .attr("dy", ".3em")
+    //.attr("font", "40px sans-serif")
+    //.attr("font-weight", "bold")
+    .attr("x", function(d) {
+      return d.x;
+    })
+    .attr("y", function(d) {
+      return d.y;
+    })
     .style("text-anchor", "middle")
+    .style("font-size", function(d) {
+      // quick and dirty : to refactor
+      return Math.round(d.r / 3) + 'px';
+    })
     .text(function(d) {
       return d.preusuel;
     });
@@ -129,49 +141,5 @@ d3.tsv("data/nat2016.txt", rowNatConverter, function(error, data) {
     .attr("cy", function(d) {
       return d.y;
     });
+
 });
-
-
-
-//  var bubbles = svgContainer.append("g")
-//    .attr("transform", "translate(0,0)")
-//    .selectAll(".bubble")
-//    .data(dataset.filter(function(d) {
-//      return d.annais.getFullYear() == 1979;
-//    }))
-//    .enter();
-
-//create the bubbles
-//  bubbles.append("circle")
-//    .attr("r", function(d) {
-//      return d.nombre;
-//    })
-//    .attr("cx", function(d) {
-//      return d.x;
-//    })
-//    .attr("cy", function(d) {
-//      return d.y;
-//    })
-//    .style("fill", function(d) {
-//      return color(d.value);
-//    });
-
-//format the text for each bubble
-//  bubbles.append("text")
-//    .attr("x", function(d) {
-//      return d.x;
-//    })
-//    .attr("y", function(d) {
-//      return d.y + 5;
-//    })
-//    .attr("text-anchor", "middle")
-//    .text(function(d) {
-//      return d["Fruit"];
-//    })
-//    .style({
-//      "fill": "white",
-//      "font-family": "Helvetica Neue, Helvetica, Arial, san-serif",
-//      "font-size": "12px"
-//    });
-
-//})
