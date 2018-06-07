@@ -1,5 +1,5 @@
 // Set the Attributes of the Graph
-var diameter = 560,
+var diameter = 1560,
   format = d3.format(",d"),
   color1 = d3.scale.category20c();
 
@@ -18,7 +18,7 @@ changebubble(8);
 
 
 function changebubble(i) {
-  d3.csv("count_s.csv", function(csvData) {
+  d3.csv("count.csv", function(csvData) {
     var years = [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014];
     pack.value(function(d) {
       return +d["count" + years[i]];

@@ -1,6 +1,6 @@
 var margin = {top: 20, right: 40, bottom: 10, left: 40},
-        width = 200,
-        height = 500 - margin.top - margin.bottom;
+        width = 500,
+        height = 900 - margin.top - margin.bottom;
 
     var format = d3.format(".1f"), topTen, counts, Selection;
 
@@ -50,7 +50,7 @@ var margin = {top: 20, right: 40, bottom: 10, left: 40},
 
     function change() {
       Selection = menu.property("value"),
-      topTen = Allcount.sort(function(a, b) { return b[Selection] - a[Selection]; }).slice(0, 10);
+      topTen = Allcount.sort(function(a, b) { return b[Selection] - a[Selection]; }).slice(0, 100);
       render(topTen);
     }
 
