@@ -1,8 +1,7 @@
-const w = 1600;
+const w = 800;
 const h = 800;
 var dataset = [];
-var dataSum = {}
-size = Math.max(w, h);
+var dataGrp = {}
 
 var svgContainer = d3.select("body")
   .append("svg")
@@ -33,22 +32,29 @@ d3.tsv("data/nat2016.txt", rowNatConverter, function(error, data) {
   dataset = data;
 
   //get population per year
-  var datagrp = d3.nest()
-  .key(function(d) { return d.annais;})
-  .rollup(function(d) {
-   return d3.sum(d, function(g) {return g.r; });
-  }).entries(data);
+
+    var tmpDataGrp = d3.nest()
+      .key(function(d) {
+        return d.annais;
+      })
+      .rollup(function(d) {
+        // sum up population for each year
+        var sumPop = d3.sum(d, function(g) {
+          return g.r;
+        });
+        // sum of the circles use the same area as a square (notwithstanding space loss)
+        return Math.sqrt((w * h) / (Math.PI * sumPop));
+
+      }).entries(data);
 
   //dictionary
-  for (var i = 0; i < datagrp.length; i++)
-  {
-    dataSum[datagrp[i].key] = datagrp[i].value;
+  for (var i = 0; i < tmpDataGrp.length; i++) {
+    dataGrp[tmpDataGrp[i].key] = tmpDataGrp[i].value;
   }
 
-  //rescale radius within each year (sum = 1 / year)
-  for (var i = 0; i < data.length; i++)
-  {
-    data[i].r = (data[i].r * 10 * h) / dataSum[data[i].annais];
+  //rescale radius
+  for (var i = 0; i < data.length; i++) {
+    data[i].r = dataGrp[data[i].annais] * Math.sqrt(data[i].r);
   }
 
 
@@ -60,7 +66,7 @@ d3.tsv("data/nat2016.txt", rowNatConverter, function(error, data) {
 
   var circles = d3.packSiblings(dataset.filter(
     function(d) {
-      return d.annais == 1990;
+      return d.annais == 1975;
     }));
 
 
@@ -76,10 +82,11 @@ d3.tsv("data/nat2016.txt", rowNatConverter, function(error, data) {
     .data(circles)
     .enter()
     .append("g")
-    .attr("transform", "translate(800,400)")
+    .attr("transform", "translate(400,400)")
 
   var bubbles = groupBubbles.append("circle")
     .style("fill", function(d) {
+
       return color(d.angle = Math.atan2(d.y, d.x));
     })
     .attr("cx", function(d) {
@@ -104,8 +111,8 @@ d3.tsv("data/nat2016.txt", rowNatConverter, function(error, data) {
     })
 
   groupBubbles.append("text")
-        .attr("dy", ".3em")
-        .style("text-anchor", "middle")
+    .attr("dy", ".3em")
+    .style("text-anchor", "middle")
     .text(function(d) {
       return d.preusuel;
     });
