@@ -1,5 +1,5 @@
 // Set the Attributes of the Graph
-var diameter = 1560,
+var diameter = 650,
   format = d3.format(",d"),
   color1 = d3.scale.category20c();
 
