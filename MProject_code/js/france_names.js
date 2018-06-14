@@ -4,7 +4,7 @@ var dataset = [];
 var dataGrp = {};
 var transitionDuration = 1000;
 var year = 1900;
-var fileNational = "data/nat2016.txt";
+var fileNational = "data/nat2016m.txt";
 
 var svgContainer = d3.select("body")
   .append("svg")
@@ -108,7 +108,7 @@ function drawBubble(year) {
   var node = svgContainer
     .selectAll("g")
     .data(circles, function(d) {
-      return d.preusuel;
+      return d.sexe + d.preusuel;
     });
 
   // remove a bubble
