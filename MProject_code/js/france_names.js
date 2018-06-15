@@ -44,7 +44,7 @@ var x = d3.scaleLinear()
     var slider = document.getElementById("year_range");
     year = slider.value
     document.getElementById("div_year").innerHTML=year
-    
+
   })
 
 //var slider = svgContainer.append("g")
@@ -95,17 +95,6 @@ var color = d3.scaleLinear()
   .domain([15, 35, 132])
   .range(["#d7191c", "#ffffbf", "#2c7bb6"])
   .interpolate(d3.interpolateHcl);
-
-
-d3.select("body").append("button")
-  .text(year)
-  .on("click", function() {
-    //select new data
-    year += 1;
-    drawBubble(year,sex);
-  });
-
-
 
 
 var inputElems = svgContainer.selectAll("input");
