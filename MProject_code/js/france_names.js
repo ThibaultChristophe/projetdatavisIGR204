@@ -17,16 +17,18 @@ var rowNatConverter = function(d) {
     // annais: new Date(+d.annais, 0, 1),
     annais: +d.annais,
     nombre: parseFloat(d.nombre),
-    r: (parseFloat(d.nombre))
+    r: parseFloat(d.nombre/200)
   };
 }
 
 // import data
-d3.tsv("data/nat2016.txt", rowNatConverter, function(error, data) {
+// let filename = "data/nat2016.txt"
+let filename = "data/nat2016-mini.txt"
+d3.tsv(filename, rowNatConverter, function(error, data) {
   if (error) {
-    console.log(error);
+    console.log("error:",error);
   } else {
-    console.log(data);
+    console.log("data:",data);
   }
 
   dataset = data;
@@ -43,7 +45,7 @@ d3.tsv("data/nat2016.txt", rowNatConverter, function(error, data) {
         return g.r;
       });
       // sum of the circles use the same area as a square (notwithstanding space loss)
-      return Math.sqrt((w * h) / (Math.PI * sumPop));
+      return 0.5 * Math.sqrt((w * h) / (Math.PI * sumPop));
 
     }).entries(data);
 
@@ -66,7 +68,7 @@ d3.tsv("data/nat2016.txt", rowNatConverter, function(error, data) {
 
   var circles = d3.packSiblings(dataset.filter(
     function(d) {
-      return d.annais == 1975;
+      return d.annais == 1979;
     }));
 
 
@@ -78,7 +80,8 @@ d3.tsv("data/nat2016.txt", rowNatConverter, function(error, data) {
   //  .range([0.1, radius]);
 
   var node = svgContainer
-    .selectAll("g.node")
+    //.selectAll("g.node")
+    .selectAll("g")
     .data(circles);
 
   var groupBubbles = node
