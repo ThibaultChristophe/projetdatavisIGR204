@@ -4,7 +4,10 @@ var dataset = [];
 var dataGrp = {};
 var transitionDuration = 1000;
 var year = 1900;
+var sex =3;
 var fileNational = "data/nat2016m.txt";
+var min_padding = 0;
+var max_padding = 50;
 
 var svgContainer = d3.select("body")
   .append("svg")
@@ -20,9 +23,20 @@ var rowNatConverter = function(d) {
     // annais: new Date(+d.annais, 0, 1),
     annais: +d.annais,
     nombre: parseFloat(d.nombre),
-    r: (parseFloat(d.nombre))
+    r: (parseFloat(d.nombre)),
+    sexe : +d.sexe
   };
 }
+
+var x = d3.scaleLinear()
+    .domain([min_padding, max_padding])
+    .range([0, w/2])
+    .clamp(true);
+
+var slider = svg.append("g")
+    .attr("class", "slider")
+    .attr("transform", "translate(" + margin.left + "," + height / 2 + ")");
+
 
 // import data and calculate appropriate circle scale
 d3.tsv(fileNational, rowNatConverter, function(error, data) {
@@ -60,7 +74,7 @@ d3.tsv(fileNational, rowNatConverter, function(error, data) {
     data[i].r = dataGrp[data[i].annais] * Math.sqrt(data[i].r);
   }
   // initialize rendering
-  drawBubble(1900);
+  drawBubble(1900,sex);
 });
 
 var color = d3.scaleLinear()
@@ -74,8 +88,20 @@ d3.select("body").append("button")
   .on("click", function() {
     //select new data
     year += 1;
-    drawBubble(year);
+    drawBubble(year,sex);
   });
+
+
+
+
+var inputElems = svgContainer.selectAll("input");
+//inputElems.on("change", function(d, i) {   // ** Highlight Change **
+     // do something here
+     //print("coucou")
+//});
+
+
+
 
 //function tick(e) {
 //  force.alpha(0.1)
@@ -91,10 +117,16 @@ d3.select("body").append("button")
 //    });
 //}
 
-function drawBubble(year) {
+function drawBubble(year,sex) {
   var circles = d3.packSiblings(dataset.filter(
     function(d) {
-      return d.annais == year;
+      if (sex == 3){ 
+        return d.annais == year 
+      }else{
+        return d.annais == year && d.sexe == sex;
+      }
+      
+
     }));
 
 
@@ -107,7 +139,7 @@ function drawBubble(year) {
 
   var node = svgContainer
     .selectAll("g")
-    .data(circles, function(d) {
+    .data(circles, function(d) { // ???????????????? data ?
       return d.sexe + d.preusuel;
     });
 
@@ -123,7 +155,7 @@ function drawBubble(year) {
       return d.r;
     })
     .attr("cx", function(d) {
-      return d.x;
+      return d.x;  // ?????????????
     })
     .attr("cy", function(d) {
       return d.y;
@@ -214,3 +246,18 @@ function drawBubble(year) {
     });
 
 }
+
+
+function teste() { 
+  var m=0;
+  for (i=0;i<6;i++) {
+    if (document.forms.ee.dmc[i].checked==true) { 
+      m=i; 
+      //alert("C'est le choix "+document.forms.ee.dmc[i].value+" qui est sélectionné");
+      console.log(Number(i+1))
+      drawBubble(year,Number(i+1));
+      break;
+    }
+  } 
+}
+
