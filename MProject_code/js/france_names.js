@@ -33,9 +33,23 @@ var x = d3.scaleLinear()
     .range([0, w/2])
     .clamp(true);
 
-var slider = svg.append("g")
-    .attr("class", "slider")
-    .attr("transform", "translate(" + margin.left + "," + height / 2 + ")");
+  var slider_control = d3.select("body").select("#year_range")
+  .on('change', (arguments) => {
+    var slider = document.getElementById("year_range");
+    year = slider.value
+    document.getElementById("div_year").innerHTML=year
+    drawBubble(year, sex)
+  })
+  .on('input', (arguments) => {
+    var slider = document.getElementById("year_range");
+    year = slider.value
+    document.getElementById("div_year").innerHTML=year
+    
+  })
+
+//var slider = svgContainer.append("g")
+//    .attr("class", "slider")
+//    .attr("transform", "translate(" + margin.left + "," + height / 2 + ")");
 
 
 // import data and calculate appropriate circle scale
@@ -120,12 +134,12 @@ var inputElems = svgContainer.selectAll("input");
 function drawBubble(year,sex) {
   var circles = d3.packSiblings(dataset.filter(
     function(d) {
-      if (sex == 3){ 
-        return d.annais == year 
+      if (sex == 3){
+        return d.annais == year
       }else{
         return d.annais == year && d.sexe == sex;
       }
-      
+
 
     }));
 
@@ -248,16 +262,15 @@ function drawBubble(year,sex) {
 }
 
 
-function teste() { 
+function teste() {
   var m=0;
   for (i=0;i<6;i++) {
-    if (document.forms.ee.dmc[i].checked==true) { 
-      m=i; 
+    if (document.forms.ee.dmc[i].checked==true) {
+      m=i;
       //alert("C'est le choix "+document.forms.ee.dmc[i].value+" qui est sélectionné");
       console.log(Number(i+1))
       drawBubble(year,Number(i+1));
       break;
     }
-  } 
+  }
 }
-
