@@ -1,7 +1,13 @@
 const w = 800;
 const h = 800;
 var dataset = [];
-var dataGrp = {}
+var dataGrp = {};
+var transitionDuration = 1000;
+var year = 1900;
+var sex =3;
+var fileNational = "data/nat2016m.txt";
+var min_padding = 0;
+var max_padding = 50;
 
 var svgContainer = d3.select("body")
   .append("svg")
@@ -17,14 +23,37 @@ var rowNatConverter = function(d) {
     // annais: new Date(+d.annais, 0, 1),
     annais: +d.annais,
     nombre: parseFloat(d.nombre),
-    r: parseFloat(d.nombre/200)
+    r: (parseFloat(d.nombre)),
+    sexe : +d.sexe
   };
 }
 
-// import data
-// let filename = "data/nat2016.txt"
-let filename = "data/nat2016-mini.txt"
-d3.tsv(filename, rowNatConverter, function(error, data) {
+var x = d3.scaleLinear()
+    .domain([min_padding, max_padding])
+    .range([0, w/2])
+    .clamp(true);
+
+  var slider_control = d3.select("body").select("#year_range")
+  .on('change', (arguments) => {
+    var slider = document.getElementById("year_range");
+    year = slider.value
+    document.getElementById("div_year").innerHTML=year
+    drawBubble(year, sex)
+  })
+  .on('input', (arguments) => {
+    var slider = document.getElementById("year_range");
+    year = slider.value
+    document.getElementById("div_year").innerHTML=year
+
+  })
+
+//var slider = svgContainer.append("g")
+//    .attr("class", "slider")
+//    .attr("transform", "translate(" + margin.left + "," + height / 2 + ")");
+
+
+// import data and calculate appropriate circle scale
+d3.tsv(fileNational, rowNatConverter, function(error, data) {
   if (error) {
     console.log("error:",error);
   } else {
@@ -44,9 +73,9 @@ d3.tsv(filename, rowNatConverter, function(error, data) {
       var sumPop = d3.sum(d, function(g) {
         return g.r;
       });
-      // sum of the circles use the same area as a square (notwithstanding space loss)
-      return 0.5 * Math.sqrt((w * h) / (Math.PI * sumPop));
-
+      // sum of the circles use the same area as a square
+      // dirty: space loss: tuned at 0.8
+      return 0.8 * Math.sqrt((w * h) / (Math.PI * sumPop));
     }).entries(data);
 
   //dictionary
@@ -58,17 +87,49 @@ d3.tsv(filename, rowNatConverter, function(error, data) {
   for (var i = 0; i < data.length; i++) {
     data[i].r = dataGrp[data[i].annais] * Math.sqrt(data[i].r);
   }
+  // initialize rendering
+  drawBubble(1900,sex);
+});
+
+var color = d3.scaleLinear()
+  .domain([15, 35, 132])
+  .range(["#d7191c", "#ffffbf", "#2c7bb6"])
+  .interpolate(d3.interpolateHcl);
 
 
-  var color = d3.scaleLinear()
-    .domain([15, 35, 132])
-    .range(["#d7191c", "#ffffbf", "#2c7bb6"])
-    .interpolate(d3.interpolateHcl);
+var inputElems = svgContainer.selectAll("input");
+//inputElems.on("change", function(d, i) {   // ** Highlight Change **
+     // do something here
+     //print("coucou")
+//});
 
 
+
+
+//function tick(e) {
+//  force.alpha(0.1)
+
+//  circle
+//    .each(gravity(e.alpha))
+//    .each(collide(.5))
+//    .attr("cx", function(d) {
+//      return d.x;
+//    })
+//    .attr("cy", function(d) {
+//      return d.y;
+//    });
+//}
+
+function drawBubble(year,sex) {
   var circles = d3.packSiblings(dataset.filter(
     function(d) {
-      return d.annais == 1979;
+      if (sex == 3){
+        return d.annais == year
+      }else{
+        return d.annais == year && d.sexe == sex;
+      }
+
+
     }));
 
 
@@ -80,16 +141,52 @@ d3.tsv(filename, rowNatConverter, function(error, data) {
   //  .range([0.1, radius]);
 
   var node = svgContainer
-    //.selectAll("g.node")
     .selectAll("g")
-    .data(circles);
+    .data(circles, function(d) { // ???????????????? data ?
+      return d.sexe + d.preusuel;
+    });
 
+  // remove a bubble
+  node.exit().selectAll("text").transition().delay(transitionDuration).remove();
+  node.exit().selectAll("circle").transition().duration(transitionDuration).attr("r", 0);
+  node.exit().transition().delay(transitionDuration).remove();
+
+  // update a bubble
+  node.select("circle")
+    .transition().duration(transitionDuration)
+    .attr("r", function(d) {
+      return d.r;
+    })
+    .attr("cx", function(d) {
+      return d.x;  // ?????????????
+    })
+    .attr("cy", function(d) {
+      return d.y;
+    })
+    //.call(force.drag);
+
+  node.select("text")
+    .transition().duration(transitionDuration)
+    .attr("x", function(d) {
+      return d.x;
+    })
+    .attr("y", function(d) {
+      return d.y;
+    })
+    .style("font-size", function(d) {
+      // quick and dirty : to refactor
+      return Math.round(d.r / 3) + 'px';
+    });
+
+  // add a new bubble (none if modified)
   var groupBubbles = node
     .enter()
     .append("g")
     .attr("transform", "translate(" + w / 2 + "," + h / 2 + ")")
 
-  var bubbles = groupBubbles.append("circle")
+
+  // only for new circles
+  groupBubbles.append("circle")
     .style("fill", function(d) {
       return color(d.angle = Math.atan2(d.y, d.x));
     })
@@ -99,29 +196,36 @@ d3.tsv(filename, rowNatConverter, function(error, data) {
     .attr("cy", function(d) {
       return Math.sin(d.angle) * (h / Math.SQRT2 + 30);
     })
-    //.attr("r", function(d) {
-    //  return d.r - 0.25;
     .attr("r", function(d) {
       return d.r //- 0.25
     })
-  //.attr("fill", "blue")
-
+    .transition()
+    .ease(d3.easeCubicOut)
+    .delay(function(d) {
+      return Math.sqrt(d.x * d.x + d.y * d.y) * 10;
+    })
+    .duration(transitionDuration)
+    .attr("cx", function(d) {
+      return d.x;
+    })
+    .attr("cy", function(d) {
+      return d.y;
+    })
+  //.call(force.drag)
+  ;
 
   //title
   groupBubbles.append("title")
-    //  .attr("text-anchor", "middle")
     .text(function(d) {
       return d.preusuel + " : " + d.nombre;
     })
 
   groupBubbles.append("text")
-    //.attr("font", "40px sans-serif")
-    //.attr("font-weight", "bold")
     .attr("x", function(d) {
-      return d.x;
+      return Math.cos(d.angle) * (w / Math.SQRT2 + 30);
     })
     .attr("y", function(d) {
-      return d.y;
+      return Math.sin(d.angle) * (h / Math.SQRT2 + 30);
     })
     .style("text-anchor", "middle")
     .style("font-size", function(d) {
@@ -130,19 +234,32 @@ d3.tsv(filename, rowNatConverter, function(error, data) {
     })
     .text(function(d) {
       return d.preusuel;
-    });
-
-  bubbles.transition()
+    })
+    .transition()
     .ease(d3.easeCubicOut)
     .delay(function(d) {
       return Math.sqrt(d.x * d.x + d.y * d.y) * 10;
     })
-    .duration(1000)
-    .attr("cx", function(d) {
+    .duration(transitionDuration)
+    .attr("x", function(d) {
       return d.x;
     })
-    .attr("cy", function(d) {
+    .attr("y", function(d) {
       return d.y;
     });
 
-});
+}
+
+
+function teste() {
+  var m=0;
+  for (i=0;i<6;i++) {
+    if (document.forms.ee.dmc[i].checked==true) {
+      m=i;
+      //alert("C'est le choix "+document.forms.ee.dmc[i].value+" qui est sélectionné");
+      console.log(Number(i+1))
+      drawBubble(year,Number(i+1));
+      break;
+    }
+  }
+}
