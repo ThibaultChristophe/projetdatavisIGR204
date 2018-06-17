@@ -77,7 +77,7 @@ d3.json('france.json', function(req, fr) {
 
 	d3.csv("output.csv", function(csv) {
 		csv = csv.filter(function(e) {
-			return (e.annais == 1990) & (e.preusuel == 'SOPHIE');
+			return (e.annais == 1990) & (e.preusuel == 'STEPHAN');
     });
 		// Quantile scales map an input domain to a discrete range, 0...max(population) to 1...9
 		var quantile = d3.scaleQuantile()
