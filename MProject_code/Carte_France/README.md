@@ -7,7 +7,8 @@
 python3 -m http.server
 ```
 * dans votre browser préféré, aller dans :
-'''
+```
 http://localhost:8000/ (ou autre port à la place du 8000)
-'''
-3- choisir coolversion_new.html (fonctionne avec le csv output.csv (data) et le json (coordonnées France))
+```
+
+* choisir coolversion_new.html (fonctionne avec le csv output.csv (data) et le json (coordonnées France))
