@@ -2,6 +2,7 @@
 
 ## Mode de lancement:
 
+* dans le terminal :
 ```
 python3 -m http.server
 ```
