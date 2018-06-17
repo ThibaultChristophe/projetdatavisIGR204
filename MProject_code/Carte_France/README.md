@@ -1,4 +1,4 @@
-carte de France intéractive :
+# carte de France intéractive :
 
 Mode de lancement:
 1- python3 -m http.server
