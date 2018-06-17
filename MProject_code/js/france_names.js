@@ -58,9 +58,7 @@ var x = d3.scaleLinear()
 d3.tsv(fileNational, rowNatConverter, function(error, data) {
   if (error) {
     console.log(error);
-  } else {
-    console.log(data);
-  }
+  } 
 
   dataset = data;
 
@@ -75,28 +73,55 @@ d3.tsv(fileNational, rowNatConverter, function(error, data) {
    
     ////dic[dataset[i].preusuel] = [dataset[i].annais]
 
-    if( ! dataset[i].annais in dict[dataset[i].preusuel]) {
+    if( ! (dataset[i].annais in dict[dataset[i].preusuel])) {
       dict[dataset[i].preusuel][dataset[i].annais] = {}
 
     }
+    //console.log(dict[dataset[i].preusuel])
+    //console.log(dict[dataset[i].preusuel][dataset[i].annais])
+    dict[dataset[i].preusuel][dataset[i].annais][dataset[i].sexe]  =  dataset[i].nombre
+
+    //try {
+      //dict[dataset[i].preusuel][dataset[i].annais][dataset[i].sexe]  =  dataset[i].nombre
+    //}
+    //catch (TypeError){
+     // console.log([dataset[i].annais])
+    //}
+
  
-    dict[dataset[i].preusuel][dataset[i].annais] =  dataset[i].nombre 
+     
     //// [dataset[i].sex] 
   }
 
-  for(var key in dict) {
+  for(var name in dict) {
+    if (!(name in dataset_der)){
+        dataset_der[name]={}
+      }
     for (y = 1901; y < 2016; y++) {
-      if (!(key in dataset_der)){
-        dataset_der[key]={}
+      if (!(y in dataset_der)){
+        dataset_der[name][y]={}
+      }
+      for (s in dict[name][y]){
+        
+        try {
+          dataset_der[name][y][s] = (dict[name][y][s] - dict[name][y-1][s])/(dict[name][y-1][s])
+
+        }
+        catch (TypeError){
+
+        }
+     
+
       }
       
-      dataset_der[key][y] = (dict[key][y] - dict[key][y-1])/dict[key][y-1]
+      
     }
 
   }
   //dict = null;
   //dict["MARIE"]
   //dataset_der["MARIE"]
+  //dict["ZULME"]["1900"]["2"]
 
   
 
@@ -132,7 +157,7 @@ d3.tsv(fileNational, rowNatConverter, function(error, data) {
 
 var color = d3.scaleLinear()
   .domain([-2,-1.5, -1, -0.5, 0, 0.5,2])
-  .range([  "#14BEDF","#72CBDD","#B6D7DE","#E3C5D8","#D371AE ","#92035C"])
+  .range([  "#14BEDF","#72CBDD","#B6D7DE","#B6D7DE","#E3C5D8","#D371AE ","#92035C"])
   .interpolate(d3.interpolateHcl);
 
 
@@ -190,7 +215,7 @@ function drawBubble(year,sex) {
     });
 
   // remove a bubble
-  node.exit().selectAll("text").transition().delay(transitionDuration).remove();
+  node.exit().selectAll("text").transition().delay(transitionDuration).remove();  // je ne comprends pas lesquelles on remove ? toutes ?
   node.exit().selectAll("circle").transition().duration(transitionDuration).attr("r", 0);
   node.exit().transition().delay(transitionDuration).remove();
 
@@ -206,6 +231,30 @@ function drawBubble(year,sex) {
     .attr("cy", function(d) {
       return d.y;
     })
+    .style("fill", function(d,i) {
+      
+      if (year ==1900) {
+        return "#F2DAE9";
+      }else{
+        return color (dataset_der[d.preusuel][year][d.sexe])
+      }
+      
+    })
+    node.select("title").text(function(d) {
+      try {
+        return d.preusuel + " : " + d.nombre + "\n evolution compared to the previous year : " + dataset_der[d.preusuel][d.annais][d.sexe].toFixed(2) ;
+      }
+      catch(TypeError){
+        console.log(d.preusuel)
+        console.log(d.annais)
+        console.log(d.sexe)
+
+
+        return d.preusuel + " : " + d.nombre  ;
+      }
+      
+    })
+
     //.call(force.drag);
 
   node.select("text")
@@ -232,16 +281,16 @@ function drawBubble(year,sex) {
   groupBubbles.append("circle")
     .style("fill", function(d,i) {
       //console.log(d.annais)
-      console.log(d.preusuel)
+      //console.log(d.preusuel)
       //console.log(prev_year[i])  /// ça marche pas :/
-      console.log(dataset_der[d.preusuel][d.annais])
+      //console.log(dataset_der[d.preusuel][d.annais])
       //console.log(dataset_der["MARIE"]["1901"])
       
       //return color(d.angle );
       if (year ==1900) {
         return "#F2DAE9";
       }else{
-        return color (dataset_der[d.preusuel][d.annais])
+        return color (dataset_der[d.preusuel][year][d.sexe])
       }
       
     })
@@ -273,7 +322,18 @@ function drawBubble(year,sex) {
   //title
   groupBubbles.append("title")
     .text(function(d) {
-      return d.preusuel + " : " + d.nombre + "\n évolution par rapport à l'année précédente : " + dataset_der[d.preusuel][d.annais] ;
+      try {
+        return d.preusuel + " : " + d.nombre + "\n evolution compared to the previous year : " + dataset_der[d.preusuel][d.annais][d.sexe].toFixed(2) ;
+      }
+      catch(TypeError){
+        console.log(d.preusuel)
+        console.log(d.annais)
+        console.log(d.sexe)
+
+
+        return d.preusuel + " : " + d.nombre  ;
+      }
+      
     })
 
   groupBubbles.append("text")
