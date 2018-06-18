@@ -118,6 +118,19 @@ function addListener(){
     .on('click', function (){
       update()
     });
+
+  form.append("input").attr("type", "radio").attr("value", "boys").attr("name", "dmc")
+    .on('click', function (){
+        update()
+    });
+  form.append("input").attr("type", "radio").attr("value", "girls").attr("name", "dmc")
+    .on('click', function (){
+        update()
+      });
+  form.append("input").attr("type", "radio").attr("value", "mixed").attr("name", "dmc")
+    .on('click', function (){
+        update()
+      });
   }
 
 function draw(year){
