@@ -118,7 +118,7 @@ d3.tsv(fileNational, rowNatConverter, function(error, data) {
     }
 
   }
-  //dict = null;
+  dict = null;
   //dict["MARIE"]
   //dataset_der["MARIE"]
   //dict["ZULME"]["1900"]["2"]
