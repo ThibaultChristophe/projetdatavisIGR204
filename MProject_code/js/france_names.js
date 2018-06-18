@@ -7,7 +7,7 @@ const h = 600;
 Stot = w * h
 
 b = 0.8
-seuil = 0.2
+seuil = 0.1
 
 var transitionDuration = 1000;
 
@@ -68,6 +68,14 @@ function initDatasets(data){
     pop_by_year[d.key] = d.value;
   });
 
+  grp_by_year_sex_name = d3.nest()
+  .key(function(d){return d.year}).sortKeys(d3.ascending)
+  .key(function(d){return d.sex}).sortKeys(d3.ascending)
+  .key(function(d){return d.name}).sortKeys(d3.ascending)
+  .rollup(function (d){
+    return d3.sum(d, function (d){return d.n;});
+  }).entries(data);
+
   grp_by_year_name = d3.nest()
   .key(function(d){return d.year}).sortKeys(d3.ascending)
   .key(function(d){return d.name}).sortKeys(d3.ascending)
@@ -75,7 +83,6 @@ function initDatasets(data){
     return d3.sum(d, function (d){return d.n;});
   }).entries(data);
 
-  // rayons_boules = grp_by_year_name.slice()
   grp_by_year_name.forEach(function (d){
     d.values.sort(function (a, b){
       return a.value > b.value;
@@ -96,11 +103,41 @@ function initDatasets(data){
       return - a.value + b.value;
     })});
 
+
+  grp_by_year_sex_name.forEach(function (d_by_y){
+    d_by_y.values.forEach(function (d_by_s){
+      d_by_s.values.sort(function (a, b){
+        return a.value - b.value > 0;
+      });
+      sum = 0
+      d_by_s.values = d_by_s.values.filter(function (elem){
+        sum += elem.value
+        return sum > seuil * pop_by_year[d_by_y.key];
+      });
+//      d_by_s.values.push({ key: 'FOURRETOUT', value: sum});
+
+      d_by_s.values.forEach(function (d2){
+        d2.r = b * Math.sqrt(d2.value / pop_by_year[d_by_y.key] * Stot / Math.PI);
+      });
+      d_by_s.values.sort(function (a, b){
+        return a.value - b.value < 0;
+      });
+    });
+
+  });
+  
 }
 
 function update(){
   year = document.forms[0]['year_range'].value;
-  draw(year);
+  var m=0;
+  for (i=0;i<3;i++) {
+    if (document.forms[0].dmc[i].checked==true) {
+      m=i;
+      break;
+    }
+  }
+  draw(year, m);
 }
 
 function addListener(){
@@ -133,10 +170,15 @@ function addListener(){
       });
   }
 
-function draw(year){
-  console.log("draw:", year, grp_by_year_name)
-  idx = year - 1900;
-  data_by_year = grp_by_year_name[idx].values
+function draw(year, sex){
+  year_idx = year - 1900;
+  if( sex == 2){
+  console.log("draw:", "year:", year, "sex:", sex, "grp:", grp_by_year_name)
+    data_by_year = grp_by_year_name[year_idx].values;
+  } else{
+  console.log("draw:", "year:", year, "sex:", sex, "grp:", grp_by_year_sex_name)
+    data_by_year = grp_by_year_sex_name[year_idx].values[sex].values;
+  }
 
   d3.packSiblings(data_by_year);
 
