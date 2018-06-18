@@ -113,3 +113,8 @@ d3.json(file_carte, function(req, fr) {
 var div = root_map_div.append("div")
   .attr("class", "tooltip")
   .style("opacity", 0);
+
+
+function displayMap(name, year, sex){
+  console.log("displayMap: name:", name, "year: ", year, "sex:", sex);
+}

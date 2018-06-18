@@ -270,6 +270,9 @@ function draw(year, sex){
     .attr("cx", d => d.x)
     .attr("cy", d => d.y)
     .style("fill", (d, i) => getColor(d, i, sex))
+    // .on('mouseover', function (d){
+    //   displayMap(d3.select(this));
+    // });
 
   circles.transition()
     .ease(d3.easeCubicOut)
@@ -279,7 +282,10 @@ function draw(year, sex){
       .attr("r", d => d.r)
       .attr("cx", d => d.x)
       .attr("cy", d => d.y)
-      .style("fill", (d, i) => getColor(d, i, sex));
+      .style("fill", (d, i) => getColor(d, i, sex))
+      // .on('mouseover', function (d,i){
+      //   console.log("mouseover:", d, i);
+      // });
 
   texts = svgbubble.selectAll("text").data(data_by_year, function (d){ return d.key; })
   texts.exit().remove()
