@@ -11,4 +11,4 @@ python3 -m http.server
 http://localhost:8000/ (ou autre port à la place du 8000)
 ```
 
-* choisir coolversion_new.html (fonctionne avec le csv output.csv (data) et le json (coordonnées France))
+* choisir coolversion_new.html (fonctionne avec le csv newCSV.csv (data) et le json (coordonnées France))
