@@ -228,6 +228,29 @@ function addListener(){
     })
   }
 
+function getColor(d,i, psex) {
+
+  if (year ==1900) {
+    return "#F2DAE9";
+  }else{
+    if(psex ==2){
+      scalar = 0
+      if( 0 in dataset_der[d.key][year]){
+        scalar += dataset_der[d.key][year][0];
+      }
+      if( 1 in dataset_der[d.key][year]){
+        scalar += dataset_der[d.key][year][1];
+      }
+    } else{
+      scalar = dataset_der[d.key][year][psex];
+    }
+    console.log("color: i:", i, "scalar:", scalar, "name:", d.key, "year:", year, "sex:", psex)
+    clr = color (scalar);
+    return clr
+  }
+
+}
+
 function draw(year, sex){
   year_idx = year - 1900;
   if( sex == 2){
@@ -252,15 +275,7 @@ function draw(year, sex){
     .attr("r", d => d.r)
     .attr("cx", d => d.x)
     .attr("cy", d => d.y)
-    .style("fill", function(d,i) {
-
-      if (year ==1900) {
-        return "#F2DAE9";
-      }else{
-        return color(dataset_der[d.key][year][sex])
-      }
-
-    })
+    .style("fill", (d, i) => getColor(d, i, sex))
 
   circles.transition()
     .ease(d3.easeCubicOut)
@@ -270,18 +285,7 @@ function draw(year, sex){
       .attr("r", d => d.r)
       .attr("cx", d => d.x)
       .attr("cy", d => d.y)
-      .style("fill", function(d,i) {
-
-        if (year ==1900) {
-          return "#F2DAE9";
-        }else{
-          scalar = dataset_der[d.key][year][sex];
-          console.log("color: i:", i, "scalar:", scalar, "name:", d.key, "year:", year, "sex:", sex)
-          clr = color (scalar);
-          return clr
-        }
-
-      })
+      .style("fill", (d, i) => getColor(d, i, sex));
 
   texts = svg.selectAll("text").data(data_by_year, function (d){ return d.key; })
   texts.exit().remove()
