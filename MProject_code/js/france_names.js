@@ -1,9 +1,9 @@
 
-/*
-Partie visuelle
-*/
-const w = 600;
-const h = 600;
+
+var root_bubble_div = d3.select("#bubble")
+
+const w = 500;
+const h = 500;
 Stot = w * h
 
 b = 0.8
@@ -21,7 +21,7 @@ color = d3.scaleLinear()
 
 addListener()
 
-var svg = d3.select("body")
+var svgbubble = root_bubble_div
   .append("svg")
   .attr("width", w)
   .attr("height", h)
@@ -55,7 +55,7 @@ d3.tsv(fileName, rowNatConverter, function(error, data) {
   } else {
     console.log("data:",data);
     initDatasets(data);
-
+    update();
   }
 
 });
@@ -68,10 +68,8 @@ function loadDerDataset(){
     }
     if( ! (dataset[i].year in dict[dataset[i].name])) {
       dict[dataset[i].name][dataset[i].year] = {}
-
     }
     dict[dataset[i].name][dataset[i].year][dataset[i].sex]  =  dataset[i].n
-
   }
 
   for(var name in dict) {
@@ -181,6 +179,7 @@ function update(){
       break;
     }
   }
+  console.log("update:", "year:", year, "sex:", m);
   draw(year, m);
 }
 
@@ -214,7 +213,7 @@ function addListener(){
         update()
       });*/
 
-    var slider_control = d3.select("body").select("#year_range")
+    var slider_control = root_bubble_div.select("#year_range")
     .on('change', (arguments) => {
       var slider = document.getElementById("year_range");
       year = slider.value
@@ -229,10 +228,9 @@ function addListener(){
   }
 
 function getColor(d,i, psex) {
-
-  if (year ==1900) {
+  if (year == 1900) {
     return "#F2DAE9";
-  }else{
+  } else {
     if(psex ==2){
       scalar = 0
       if( 0 in dataset_der[d.key][year]){
@@ -244,26 +242,22 @@ function getColor(d,i, psex) {
     } else{
       scalar = dataset_der[d.key][year][psex];
     }
-    console.log("color: i:", i, "scalar:", scalar, "name:", d.key, "year:", year, "sex:", psex)
     clr = color (scalar);
     return clr
   }
-
 }
 
 function draw(year, sex){
   year_idx = year - 1900;
   if( sex == 2){
-  console.log("draw:", "year:", year, "sex:", sex, "grp:", grp_by_year_name)
     data_by_year = grp_by_year_name[year_idx].values;
   } else{
-  console.log("draw:", "year:", year, "sex:", sex, "grp:", grp_by_year_sex_name)
     data_by_year = grp_by_year_sex_name[year_idx].values[sex].values;
   }
 
   d3.packSiblings(data_by_year);
 
-  circles = svg.selectAll("circle")
+  circles = svgbubble.selectAll("circle")
     .data(data_by_year, function (d){ return d.key; })
   circles.exit().remove()
   circles.enter().append("circle")
@@ -287,7 +281,7 @@ function draw(year, sex){
       .attr("cy", d => d.y)
       .style("fill", (d, i) => getColor(d, i, sex));
 
-  texts = svg.selectAll("text").data(data_by_year, function (d){ return d.key; })
+  texts = svgbubble.selectAll("text").data(data_by_year, function (d){ return d.key; })
   texts.exit().remove()
   texts.enter().append("text").transition()
     .ease(d3.easeCubicOut)

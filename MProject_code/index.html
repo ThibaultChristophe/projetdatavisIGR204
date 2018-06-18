@@ -5,29 +5,26 @@
   <meta charset="utf-8">
   <title>Test D3js</title>
   <script type="text/javascript" src="js/d3/d3.js"></script>
-  <!--style type="text/css">
-    .circle {
-      fill: #777b06;
-    }
-    .hcircle {
-      fill: #a96c2a;
-    }
-  </style-->
+  <script src="js/topojson.v2.min.js"></script>
+  <link rel="stylesheet" href="css/carte-de-france.css">
 </head>
 
 <body>
+  <div id="bubble">
   <form>
     <input type="range" min="1900" max="2015" value="2000" class="slider" id="year_range">
     <div id="div_year"></div>
     Boys <input type="radio" name="dmc" value="boys" onClick="update()">
     Girls <input type="radio" name="dmc" value="girls" onClick="update()">
     Mixed <input type="radio" name="dmc" value="mixed" checked onClick="update()">
-
-
-
-
   </form>
    <script type="text/javascript" src="js/france_names.js"></script>
+ </div>
+
+ <div id="francemap">
+  <script type="text/javascript" src="js/carte-france.js"></script>
+ </div>
+
 </body>
 
 </html>

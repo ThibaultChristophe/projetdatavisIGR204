@@ -4,6 +4,9 @@ var width = 700,
 var file_by_dept = "pretreatment/output.csv"
 var file_carte = "data/france.json"
 
+var root_map_div = d3.select("#francemap")
+
+
 var path = d3.geoPath();
 
 // Define projection property
@@ -15,14 +18,14 @@ var projection = d3.geoConicConformal() // Lambert-93
 path.projection(projection); // Assign projection to path object
 
 // Create the DIV that will contain our map
-var svg = d3.select('body').append("svg")
-  .attr("id", "svg")
+var svg_map = root_map_div.append("svg")
+  .attr("id", "svgmap")
   .attr("width", width)
   .attr("height", height)
   .attr("class", "YlOrRd");
 
 // Append the group that will contain our paths
-var deps = svg.append("g");
+var deps = svg_map.append("g");
 
 // Load GeoJSON data and run a function for each entry
 d3.json(file_carte, function(req, fr) {
@@ -49,7 +52,7 @@ d3.json(file_carte, function(req, fr) {
       .range(d3.range(9));
 
 
-    var legend = svg.append('g')
+    var legend = svg_map.append('g')
       .attr('transform', 'translate(525, 150)')
       .attr('id', 'legend');
 
@@ -72,7 +75,7 @@ d3.json(file_carte, function(req, fr) {
       })])
       .range([0, 9 * 20]);
 
-    var legendAxis = svg.append("g")
+    var legendAxis = svg_map.append("g")
       .attr('transform', 'translate(550, 150)')
       .call(d3.axisRight(legendScale).ticks(6));
 
@@ -107,6 +110,6 @@ d3.json(file_carte, function(req, fr) {
 });
 
 // Append a DIV for the tooltip
-var div = d3.select("body").append("div")
+var div = root_map_div.append("div")
   .attr("class", "tooltip")
   .style("opacity", 0);
