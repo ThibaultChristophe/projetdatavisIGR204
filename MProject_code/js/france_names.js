@@ -1,264 +1,179 @@
-const w = 800;
-const h = 800;
-var dataset = [];
-var dataGrp = {};
+
+/*
+Partie visuelle
+*/
+const w = 600;
+const h = 600;
+Stot = w * h
+
+b = 0.8
+seuil = 0.2
+
 var transitionDuration = 1000;
-var year = 1900;
-var sex =3;
-var fileNational = "data/nat2016m.txt";
+
 var min_padding = 0;
 var max_padding = 50;
 
-var packed_circles =[]
 
-var svgContainer = d3.select("body")
+addListener()
+
+var svg = d3.select("body")
   .append("svg")
   .attr("width", w)
   .attr("height", h)
-//  .attr("class", "bubble");
+  .append("g")
+    .attr("transform", "translate(" + w / 2 + "," + h / 2 + ")")
 
-// convert data
+
+
+/*
+Traitements dataset
+*/
+var dataset = [];
+var fileName = "data/dpt2016.txt";
+
 var rowNatConverter = function(d) {
   return {
-    sexe: parseFloat(d.sexe),
-    preusuel: d.preusuel,
-    // annais: new Date(+d.annais, 0, 1),
-    annais: +d.annais,
-    nombre: parseFloat(d.nombre),
-    r: (parseFloat(d.nombre)),
-    sexe : +d.sexe
+    name: d.preusuel,
+    year: +d.annais,
+    n: parseFloat(d.nombre),
+    department: d.dpt,
+    sex : +d.sexe
   };
 }
 
-var x = d3.scaleLinear()
-    .domain([min_padding, max_padding])
-    .range([0, w/2])
-    .clamp(true);
 
-  var slider_control = d3.select("body").select("#year_range")
-  .on('change', (arguments) => {
-    var slider = document.getElementById("year_range");
-    year = slider.value
-    document.getElementById("div_year").innerHTML = year
-    drawBubble(year, sex)
-  })
-  .on('input', (arguments) => {
-    var slider = document.getElementById("year_range");
-    year = slider.value
-    document.getElementById("div_year").innerHTML = year
-
-  })
-
-//var slider = svgContainer.append("g")
-//    .attr("class", "slider")
-//    .attr("transform", "translate(" + margin.left + "," + height / 2 + ")");
-
-
-// import data and calculate appropriate circle scale
-d3.tsv(fileNational, rowNatConverter, function(error, data) {
+d3.tsv(fileName, rowNatConverter, function(error, data) {
+  dataset = data;
   if (error) {
     console.log("error:",error);
   } else {
     console.log("data:",data);
+    initDatasets(data)
   }
 
-  dataset = data;
-
-  //get population per year
-
-  var tmpDataGrp = d3.nest()
-    .key(function(d) {
-      return d.annais;
-    })
-    .rollup(function(d) {
-      // sum up population for each year
-      var sumPop = d3.sum(d, function(g) {
-        return g.r;
-      });
-      // sum of the circles use the same area as a square
-      // dirty: space loss: tuned at 0.8
-      return 0.8 * Math.sqrt((w * h) / (Math.PI * sumPop));
-    }).entries(data);
-
-  //dictionary
-  for (var i = 0; i < tmpDataGrp.length; i++) {
-    dataGrp[tmpDataGrp[i].key] = tmpDataGrp[i].value;
-  }
-
-  //rescale radius
-  for (var i = 0; i < data.length; i++) {
-    data[i].r = dataGrp[data[i].annais] * Math.sqrt(data[i].r);
-  }
-  // initialize rendering
-  drawBubble(1900,sex);
 });
 
-var color = d3.scaleLinear()
-  .domain([15, 35, 132])
-  .range(["#d7191c", "#ffffbf", "#2c7bb6"])
-  .interpolate(d3.interpolateHcl);
 
+function initDatasets(data){
 
-var inputElems = svgContainer.selectAll("input");
-//inputElems.on("change", function(d, i) {   // ** Highlight Change **
-     // do something here
-     //print("coucou")
-//});
+  grp_by_year = d3.nest()
+  .key(function(d){return d.year}).sortKeys(d3.ascending)
+  .rollup(function (d){
+    return d3.sum(d, function (d){return d.n;});
+  }).entries(data);
 
+  pop_by_year = {}
+  grp_by_year.forEach(function (d){
+    pop_by_year[d.key] = d.value;
+  });
 
+  grp_by_year_name = d3.nest()
+  .key(function(d){return d.year}).sortKeys(d3.ascending)
+  .key(function(d){return d.name}).sortKeys(d3.ascending)
+  .rollup(function (d){
+    return d3.sum(d, function (d){return d.n;});
+  }).entries(data);
 
-
-//function tick(e) {
-//  force.alpha(0.1)
-
-//  circle
-//    .each(gravity(e.alpha))
-//    .each(collide(.5))
-//    .attr("cx", function(d) {
-//      return d.x;
-//    })
-//    .attr("cy", function(d) {
-//      return d.y;
-//    });
-//}
-
-function drawBubble(year,sex) {
-  var circles = d3.packSiblings(dataset.filter(
-    function(d) {
-      if (sex == 3){
-        return d.annais == year
-      }else{
-        return d.annais == year && d.sexe == sex;
-      }
-    }));
-    packed_circles=circles
-
-  //.filter(function(d) {
-  //  return -500 < d.x && d.x < 500 && -500 < d.y && d.y < 500;
-  //})
-  //var scaleRadius = d3.scaleSqrt()
-  //  .domain([0, max_population])
-  //  .range([0.1, radius]);
-
-  var node = svgContainer
-    .selectAll("g")
-    .data(circles, function(d) { // ???????????????? data ?
-      return d.sexe + d.preusuel;
+  // rayons_boules = grp_by_year_name.slice()
+  grp_by_year_name.forEach(function (d){
+    d.values.sort(function (a, b){
+      return a.value > b.value;
     });
-
-  // remove a bubble
-  node.selectAll("text").exit().transition().duration(transitionDuration).remove();
-  node.selectAll("circle").exit().transition().duration(transitionDuration).attr("r", 0);
-
-  // update a bubble
-  node.select("circle")
-    .transition().duration(transitionDuration)
-    .attr("r", function(d) {
-      return d.r;
-    })
-    .attr("cx", function(d) {
-      return d.x;  // ?????????????
-    })
-    .attr("cy", function(d) {
-      return d.y;
-    })
-    //.call(force.drag);
-
-  node.select("text")
-    .transition().duration(transitionDuration)
-    .attr("x", function(d) {
-      return d.x;
-    })
-    .attr("y", function(d) {
-      return d.y;
-    })
-    .style("font-size", function(d) {
-      // quick and dirty : to refactor
-      return Math.round(d.r / 3) + 'px';
+    sum = 0
+    d.values = d.values.filter(function (elem){
+      sum += elem.value
+      return sum > seuil * pop_by_year[d.key];
     });
+    //d.values.push({ key: 'FOURRETOUT', value: sum});
 
-  // add a new bubble (none if modified)
-  var groupBubbles = node
-    .enter()
-    .append("g")
-    .attr("transform", "translate(" + w / 2 + "," + h / 2 + ")")
-
-
-  // only for new circles
-  groupBubbles.append("circle")
-    .style("fill", function(d) {
-      return color(d.angle = Math.atan2(d.y, d.x));
-    })
-    .attr("cx", function(d) {
-      return Math.cos(d.angle) * (w / Math.SQRT2 + 30);
-    })
-    .attr("cy", function(d) {
-      return Math.sin(d.angle) * (h / Math.SQRT2 + 30);
-    })
-    .attr("r", function(d) {
-      return d.r //- 0.25
-    })
-    .transition()
-    .ease(d3.easeCubicOut)
-    .delay(function(d) {
-      return Math.sqrt(d.x * d.x + d.y * d.y) * 10;
-    })
-    .duration(transitionDuration)
-    .attr("cx", function(d) {
-      return d.x;
-    })
-    .attr("cy", function(d) {
-      return d.y;
-    })
-  //.call(force.drag)
-  ;
-
-  //title
-  groupBubbles.append("title")
-    .text(function(d) {
-      return d.preusuel + " : " + d.nombre;
-    })
-
-  groupBubbles.append("text")
-    .attr("x", function(d) {
-      return Math.cos(d.angle) * (w / Math.SQRT2 + 30);
-    })
-    .attr("y", function(d) {
-      return Math.sin(d.angle) * (h / Math.SQRT2 + 30);
-    })
-    .style("text-anchor", "middle")
-    .style("font-size", function(d) {
-      // quick and dirty : to refactor
-      return Math.round(d.r / 3) + 'px';
-    })
-    .text(function(d) {
-      return d.preusuel;
-    })
-    .transition()
-    .ease(d3.easeCubicOut)
-    .delay(function(d) {
-      return Math.sqrt(d.x * d.x + d.y * d.y) * 10;
-    })
-    .duration(transitionDuration)
-    .attr("x", function(d) {
-      return d.x;
-    })
-    .attr("y", function(d) {
-      return d.y;
+    d.values.forEach(function (d2){
+      d2.r = b * Math.sqrt(d2.value / pop_by_year[d.key] * Stot / Math.PI);
     });
+  });
+  grp_by_year_name.forEach(function (d){
+    d.values.sort(function (a, b){
+      return - a.value + b.value;
+    })});
 
 }
 
+function update(){
+  year = document.forms[0]['year_range'].value;
+  draw(year);
+}
 
-function teste() {
-  var m=0;
-  for (i=0;i<6;i++) {
-    if (document.forms.ee.dmc[i].checked==true) {
-      m=i;
-      //alert("C'est le choix "+document.forms.ee.dmc[i].value+" qui est sélectionné");
-      console.log(Number(i+1))
-      drawBubble(year,Number(i+1));
-      break;
-    }
+function addListener(){
+  div = d3.select("body").append("div").attr("class", "layer")
+  div_year = div.append("div").attr("id", "div_year")
+  form = div.append("form")
+  in_year = form.append("input")
+    .attr("type", "text").attr("name", "year_range")
+    .attr("value", "1950");
+
+  in_year.on('change', function (){
+    update()
+  });
+  form.append("input").attr("type", "button").attr("value", "Ok")
+    .on('click', function (){
+      update()
+    });
   }
+
+function draw(year){
+  console.log("draw:", year, grp_by_year_name)
+  idx = year - 1900;
+  data_by_year = grp_by_year_name[idx].values
+
+  d3.packSiblings(data_by_year);
+
+  circles = svg.selectAll("circle")
+    .data(data_by_year, function (d){ return d.key; })
+  circles.exit().remove()
+  circles.enter().append("circle")
+  .transition()
+  .ease(d3.easeCubicOut)
+  .delay(function(d) {
+    return Math.sqrt(d.x * d.x + d.y * d.y) * 10;
+  })
+    .attr("class", "circle")
+    .attr("r", d => d.r)
+    .attr("cx", d => d.x)
+    .attr("cy", d => d.y);
+
+  circles.transition()
+    .ease(d3.easeCubicOut)
+    .delay(function(d) {
+      return Math.sqrt(d.x * d.x + d.y * d.y) * 10;
+    })
+      .attr("class", "circle")
+      .attr("r", d => d.r)
+      .attr("cx", d => d.x)
+      .attr("cy", d => d.y);
+
+  texts = svg.selectAll("text").data(data_by_year, function (d){ return d.key; })
+  texts.exit().remove()
+  texts.enter().append("text").transition()
+    .ease(d3.easeCubicOut)
+    .delay(function(d) {
+      return Math.sqrt(d.x * d.x + d.y * d.y) * 10;
+    })
+    .attr("x", d=>d.x).attr("y", d=>d.y)
+    .text(d=>d.key)
+    .style("text-anchor", "middle")
+    .style("font-size", function(d) {
+      return Math.round(d.r / 3) + 'px';
+    });
+  texts.transition()
+    .ease(d3.easeCubicOut)
+    .delay(function(d) {
+      return Math.sqrt(d.x * d.x + d.y * d.y) * 10;
+    })
+    .attr("x", d=>d.x).attr("y", d=>d.y)
+    .text(d=>d.key)
+    .style("text-anchor", "middle")
+    .style("font-size", function(d) {
+          return Math.round(d.r / 3) + 'px';
+        });
+
 }
