@@ -1,6 +1,8 @@
 const w = 800;
 const h = 800;
 var dataset = [];
+var dataset_der ={};
+var dict ={} ;
 var dataGrp = {};
 var transitionDuration = 1000;
 var year = 1900;
@@ -64,6 +66,70 @@ d3.tsv(fileNational, rowNatConverter, function(error, data) {
 
   dataset = data;
 
+  for (i = 0; i < dataset.length; i++) {
+    //console.log("coucou")
+
+    //dataset_der.push(obj)
+    if (! (dataset[i].preusuel in dict)){
+      dict[dataset[i].preusuel] ={}
+      //console.log("coucou")
+    }
+
+    ////dic[dataset[i].preusuel] = [dataset[i].annais]
+
+    if( ! (dataset[i].annais in dict[dataset[i].preusuel])) {
+      dict[dataset[i].preusuel][dataset[i].annais] = {}
+
+    }
+    //console.log(dict[dataset[i].preusuel])
+    //console.log(dict[dataset[i].preusuel][dataset[i].annais])
+    dict[dataset[i].preusuel][dataset[i].annais][dataset[i].sexe]  =  dataset[i].nombre
+
+    //try {
+      //dict[dataset[i].preusuel][dataset[i].annais][dataset[i].sexe]  =  dataset[i].nombre
+    //}
+    //catch (TypeError){
+     // console.log([dataset[i].annais])
+    //}
+
+
+
+    //// [dataset[i].sex]
+  }
+
+  for(var name in dict) {
+    if (!(name in dataset_der)){
+        dataset_der[name]={}
+      }
+    for (y = 1901; y < 2016; y++) {
+      if (!(y in dataset_der)){
+        dataset_der[name][y]={}
+      }
+      for (s in dict[name][y]){
+
+        try {
+          dataset_der[name][y][s] = (dict[name][y][s] - dict[name][y-1][s])/(dict[name][y-1][s])
+
+        }
+        catch (TypeError){
+
+        }
+
+
+      }
+
+
+    }
+
+  }
+  dict = null;
+  //dict["MARIE"]
+  //dataset_der["MARIE"]
+  //dict["ZULME"]["1900"]["2"]
+
+
+
+
   //get population per year
 
   var tmpDataGrp = d3.nest()
@@ -94,9 +160,10 @@ d3.tsv(fileNational, rowNatConverter, function(error, data) {
 });
 
 var color = d3.scaleLinear()
-  .domain([15, 35, 132])
-  .range(["#d7191c", "#ffffbf", "#2c7bb6"])
+  .domain([-2,-1.5, -1, -0.5, 0, 0.5,2])
+  .range([  "#14BEDF","#72CBDD","#B6D7DE","#B6D7DE","#E3C5D8","#D371AE ","#92035C"])
   .interpolate(d3.interpolateHcl);
+
 
 
 var inputElems = svgContainer.selectAll("input");
@@ -131,7 +198,10 @@ function drawBubble(year,sex) {
         return d.annais == year && d.sexe == sex;
       }
     }));
-    packed_circles=circles
+
+
+
+
 
   //.filter(function(d) {
   //  return -500 < d.x && d.x < 500 && -500 < d.y && d.y < 500;
@@ -147,8 +217,9 @@ function drawBubble(year,sex) {
     });
 
   // remove a bubble
-  node.selectAll("text").exit().transition().duration(transitionDuration).remove();
-  node.selectAll("circle").exit().transition().duration(transitionDuration).attr("r", 0);
+  node.exit().selectAll("text").transition().delay(transitionDuration).remove();  // je ne comprends pas lesquelles on remove ? toutes ?
+  node.exit().selectAll("circle").transition().duration(transitionDuration).attr("r", 0);
+  node.exit().transition().delay(transitionDuration).remove();
 
   // update a bubble
   node.select("circle")
@@ -162,6 +233,30 @@ function drawBubble(year,sex) {
     .attr("cy", function(d) {
       return d.y;
     })
+    .style("fill", function(d,i) {
+
+      if (year ==1900) {
+        return "#F2DAE9";
+      }else{
+        return color (dataset_der[d.preusuel][year][d.sexe])
+      }
+
+    })
+    node.select("title").text(function(d) {
+      try {
+        return d.preusuel + " : " + d.nombre + "\n evolution compared to the previous year : " + dataset_der[d.preusuel][d.annais][d.sexe].toFixed(2) ;
+      }
+      catch(TypeError){
+        console.log(d.preusuel)
+        console.log(d.annais)
+        console.log(d.sexe)
+
+
+        return d.preusuel + " : " + d.nombre  ;
+      }
+
+    })
+
     //.call(force.drag);
 
   node.select("text")
@@ -186,10 +281,23 @@ function drawBubble(year,sex) {
 
   // only for new circles
   groupBubbles.append("circle")
-    .style("fill", function(d) {
-      return color(d.angle = Math.atan2(d.y, d.x));
+    .style("fill", function(d,i) {
+      //console.log(d.annais)
+      //console.log(d.preusuel)
+      //console.log(prev_year[i])  /// ça marche pas :/
+      //console.log(dataset_der[d.preusuel][d.annais])
+      //console.log(dataset_der["MARIE"]["1901"])
+
+      //return color(d.angle );
+      if (year ==1900) {
+        return "#F2DAE9";
+      }else{
+        return color (dataset_der[d.preusuel][year][d.sexe])
+      }
+
     })
     .attr("cx", function(d) {
+      d.angle = Math.atan2(d.y, d.x)
       return Math.cos(d.angle) * (w / Math.SQRT2 + 30);
     })
     .attr("cy", function(d) {
@@ -216,7 +324,18 @@ function drawBubble(year,sex) {
   //title
   groupBubbles.append("title")
     .text(function(d) {
-      return d.preusuel + " : " + d.nombre;
+      try {
+        return d.preusuel + " : " + d.nombre + "\n evolution compared to the previous year : " + dataset_der[d.preusuel][d.annais][d.sexe].toFixed(2) ;
+      }
+      catch(TypeError){
+        console.log(d.preusuel)
+        console.log(d.annais)
+        console.log(d.sexe)
+
+
+        return d.preusuel + " : " + d.nombre  ;
+      }
+
     })
 
   groupBubbles.append("text")
@@ -250,10 +369,10 @@ function drawBubble(year,sex) {
 }
 
 
-function teste() {
+function gender() {
   var m=0;
   for (i=0;i<6;i++) {
-    if (document.forms.ee.dmc[i].checked==true) {
+    if (document.forms.gender_form.dmc[i].checked==true) {
       m=i;
       //alert("C'est le choix "+document.forms.ee.dmc[i].value+" qui est sélectionné");
       console.log(Number(i+1))
@@ -262,3 +381,15 @@ function teste() {
     }
   }
 }
+
+
+var prev_year = (dataset.filter(
+    function(d) {
+      if (sex == 3){
+        return d.annais == year -1
+      }else{
+        return d.annais == year -1 && d.sexe == sex;
+      }
+
+
+}));
