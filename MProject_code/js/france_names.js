@@ -9,6 +9,8 @@ var fileNational = "data/nat2016m.txt";
 var min_padding = 0;
 var max_padding = 50;
 
+var packed_circles =[]
+
 var svgContainer = d3.select("body")
   .append("svg")
   .attr("width", w)
@@ -37,13 +39,13 @@ var x = d3.scaleLinear()
   .on('change', (arguments) => {
     var slider = document.getElementById("year_range");
     year = slider.value
-    document.getElementById("div_year").innerHTML=year
+    document.getElementById("div_year").innerHTML = year
     drawBubble(year, sex)
   })
   .on('input', (arguments) => {
     var slider = document.getElementById("year_range");
     year = slider.value
-    document.getElementById("div_year").innerHTML=year
+    document.getElementById("div_year").innerHTML = year
 
   })
 
@@ -128,10 +130,8 @@ function drawBubble(year,sex) {
       }else{
         return d.annais == year && d.sexe == sex;
       }
-
-
     }));
-
+    packed_circles=circles
 
   //.filter(function(d) {
   //  return -500 < d.x && d.x < 500 && -500 < d.y && d.y < 500;
@@ -147,9 +147,8 @@ function drawBubble(year,sex) {
     });
 
   // remove a bubble
-  node.exit().selectAll("text").transition().delay(transitionDuration).remove();
-  node.exit().selectAll("circle").transition().duration(transitionDuration).attr("r", 0);
-  node.exit().transition().delay(transitionDuration).remove();
+  node.selectAll("text").exit().transition().duration(transitionDuration).remove();
+  node.selectAll("circle").exit().transition().duration(transitionDuration).attr("r", 0);
 
   // update a bubble
   node.select("circle")
