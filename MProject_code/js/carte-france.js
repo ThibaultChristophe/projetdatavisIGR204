@@ -1,7 +1,7 @@
 var width = 700,
   height = 550;
 
-var file_by_dept = "pretreatment/output.csv"
+var file_by_dept = "pretreatment/newCSV.csv"
 var file_carte = "data/france.json"
 
 var root_map_div = d3.select("#francemap")
@@ -80,7 +80,8 @@ d3.json(file_carte, function(req, fr) {
       .call(d3.axisRight(legendScale).ticks(6));
 
     csv.forEach(function(e, i) {
-      var tooltip = "<b>Département : </b>" + e.dpt + "<br>" + "<b>Nbre naissance : </b>" + e.nombre + "<br>";
+      var tooltip = "<b>Département : </b>" + e.dpt + "<br>" + "<b>Naissances : </b>" + e.nombre + "<br>" +"<b>Proportion : </b>" + Number(Math.round((e.nombre*100/e.somme)+'e2')+'e-2') + "<b>%</b>" + "<br>";
+
       if (e.nombre > 0) {
         var tooltip = tooltip + "<b>Prénom : </b>" + e.preusuel + "<br>" + "<b>Année : </b>" + e.annais + "<br>";
       }
