@@ -1,4 +1,6 @@
 # Carte de France intéractive :
+* visualisation des prénoms sur une carte de France.
+* possibilité de voir le nombre de naissance, la proportion des prénoms pour une année donnée et pour un département donné 
 
 ## Mode de lancement:
 
