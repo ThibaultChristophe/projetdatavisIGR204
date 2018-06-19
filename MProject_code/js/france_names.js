@@ -237,6 +237,9 @@ function draw(year, sex){
 
   bubbleG = svgbubble.selectAll("g").data(data_by_year, function (d){ return d.key; })
   bubbleG_new = bubbleG.enter().append("g")
+    .on("click", function (d){
+      displayMap(d.key, year, sex);
+    });
 
   bubbleG_new.append("circle")
     .transition()
@@ -296,4 +299,8 @@ function draw(year, sex){
     bubbleG_new.append("title").text(d=> getTitle(d, year, sex));
     bubbleG.select("title").text(d=> getTitle(d, year, sex));
 
+}
+
+function displayMap(name, year, sex){
+  console.log("name:", name, "year:", year, "sex:", sex);
 }
