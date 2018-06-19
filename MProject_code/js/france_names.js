@@ -29,10 +29,6 @@ var svgbubble = root_bubble_div
     .attr("transform", "translate(" + w / 2 + "," + h / 2 + ")")
 
 
-
-/*
-Traitements dataset
-*/
 var dataset = [];
 var dataset_der ={};
 
@@ -184,35 +180,6 @@ function update(){
 }
 
 function addListener(){
-  /*
-  div = d3.select("body").append("div").attr("class", "layer")
-  div_year = div.append("div").attr("id", "div_year")
-  form = div.append("form")
-  in_year = form.append("input")
-    .attr("type", "text").attr("name", "year_range")
-    .attr("value", "1950");
-
-  in_year.on('change', function (){
-    update()
-  });
-  form.append("input").attr("type", "button").attr("value", "Ok")
-    .on('click', function (){
-      update()
-    });
-
-  form.append("input").attr("type", "radio").attr("value", "boys").attr("name", "dmc")
-    .on('click', function (){
-        update()
-    });
-  form.append("input").attr("type", "radio").attr("value", "girls").attr("name", "dmc")
-    .on('click', function (){
-        update()
-      });
-  form.append("input").attr("type", "radio").attr("value", "mixed").attr("name", "dmc")
-    .on('click', function (){
-        update()
-      });*/
-
     var slider_control = root_bubble_div.select("#year_range")
     .on('change', (arguments) => {
       var slider = document.getElementById("year_range");
@@ -247,6 +214,17 @@ function getColor(d,i, psex) {
   }
 }
 
+function getTitle(d, pyear, psex){
+  // console.log("getTitle: year:", pyear, "sex:", psex, "d:", d);
+  try {
+    return d.key + " : " + d.value + "\n evolution compared to the previous year : " + dataset_der[d.key][pyear][psex].toFixed(2) ;
+  }
+  catch(TypeError){
+    console.log("error getTilte:", d.key, "year: ", pyear, "sexe:", psex);
+    return d.key + " : " + d.value  ;
+  }
+}
+
 function draw(year, sex){
   year_idx = year - 1900;
   if( sex == 2){
@@ -257,39 +235,30 @@ function draw(year, sex){
 
   d3.packSiblings(data_by_year);
 
-  circles = svgbubble.selectAll("circle")
-    .data(data_by_year, function (d){ return d.key; })
-  circles.exit().remove()
-  circles.enter().append("circle")
-  .transition()
-  .ease(d3.easeCubicOut)
-  .delay(function(d) {
-    return Math.sqrt(d.x * d.x + d.y * d.y) * 10;
-  })
+  bubbleG = svgbubble.selectAll("g").data(data_by_year, function (d){ return d.key; })
+  bubbleG_new = bubbleG.enter().append("g")
+
+  bubbleG_new.append("circle")
+    .transition()
+    .ease(d3.easeCubicOut)
+    .delay(function(d) { return Math.sqrt(d.x * d.x + d.y * d.y) * 10; })
     .attr("r", d => d.r)
     .attr("cx", d => d.x)
     .attr("cy", d => d.y)
-    .style("fill", (d, i) => getColor(d, i, sex))
-    // .on('mouseover', function (d){
-    //   displayMap(d3.select(this));
-    // });
+    .style("fill", (d, i) => getColor(d, i, sex));
 
-  circles.transition()
+  bubbleG.select("circle")
+    .transition()
     .ease(d3.easeCubicOut)
-    .delay(function(d) {
-      return Math.sqrt(d.x * d.x + d.y * d.y) * 10;
-    })
-      .attr("r", d => d.r)
-      .attr("cx", d => d.x)
-      .attr("cy", d => d.y)
-      .style("fill", (d, i) => getColor(d, i, sex))
-      // .on('mouseover', function (d,i){
-      //   console.log("mouseover:", d, i);
-      // });
+    .delay(function(d) { return Math.sqrt(d.x * d.x + d.y * d.y) * 10; })
+    .attr("r", d => d.r)
+    .attr("cx", d => d.x)
+    .attr("cy", d => d.y)
+    .style("fill", (d, i) => getColor(d, i, sex));
 
-  texts = svgbubble.selectAll("text").data(data_by_year, function (d){ return d.key; })
-  texts.exit().remove()
-  texts.enter().append("text").transition()
+
+  bubbleG_new.append("text")
+    .transition()
     .ease(d3.easeCubicOut)
     .delay(function(d) {
       return Math.sqrt(d.x * d.x + d.y * d.y) * 10;
@@ -300,16 +269,31 @@ function draw(year, sex){
     .style("font-size", function(d) {
       return Math.round(d.r / 3) + 'px';
     });
-  texts.transition()
-    .ease(d3.easeCubicOut)
-    .delay(function(d) {
-      return Math.sqrt(d.x * d.x + d.y * d.y) * 10;
-    })
-    .attr("x", d=>d.x).attr("y", d=>d.y)
-    .text(d=>d.key)
-    .style("text-anchor", "middle")
-    .style("font-size", function(d) {
-          return Math.round(d.r / 3) + 'px';
-        });
+
+    bubbleG.select("text")
+      .transition()
+      .ease(d3.easeCubicOut)
+      .delay(function(d) {
+        return Math.sqrt(d.x * d.x + d.y * d.y) * 10;
+      })
+      .attr("x", d=>d.x).attr("y", d=>d.y)
+      .text(d=>d.key)
+      .style("text-anchor", "middle")
+      .style("font-size", function(d) {
+        return Math.round(d.r / 3) + 'px';
+      });
+    bubbleG.exit().selectAll("circle")
+      .transition().ease(d3.easeCubicOut)
+      .duration(function(d) {
+        return 1/Math.sqrt(d.x * d.x + d.y * d.y) * 10;
+      })
+      .attr("r", "0")
+      .remove()
+    bubbleG.exit().selectAll("text").remove()
+    bubbleG.exit().selectAll("title").remove()
+    bubbleG.exit().remove()
+
+    bubbleG_new.append("title").text(d=> getTitle(d, year, sex));
+    bubbleG.select("title").text(d=> getTitle(d, year, sex));
 
 }
