@@ -1,19 +1,23 @@
 
-
+/* déclarations bubbles */
 var root_bubble_div = d3.select("#bubble")
-
-const w = 500;
-const h = 500;
-Stot = w * h
-
+const bubble_w = 500;
+const bubble_h = 500;
+Stot = bubble_w * bubble_h
 b = 0.8
 seuil = 0.1
-
 var transitionDuration = 1000;
 
-var min_padding = 0;
-var max_padding = 50;
+/* déclarations map */
+var map_w = 700;
+var map_h = 550;
+var file_carte = "data/france.json"
 
+var root_map_div = d3.select("#francemap")
+
+
+
+/* bubble */
 color = d3.scaleLinear()
   .domain([-2,-1.5, -1, -0.5, 0, 0.5,2])
   .range([  "#14BEDF","#72CBDD","#B6D7DE","#B6D7DE","#E3C5D8","#D371AE ","#92035C"])
@@ -23,10 +27,10 @@ addListener()
 
 var svgbubble = root_bubble_div
   .append("svg")
-  .attr("width", w)
-  .attr("height", h)
+  .attr("width", bubble_w)
+  .attr("height", bubble_h)
   .append("g")
-    .attr("transform", "translate(" + w / 2 + "," + h / 2 + ")")
+    .attr("transform", "translate(" + bubble_w / 2 + "," + bubble_h / 2 + ")")
 
 
 var dataset = [];
@@ -55,6 +59,69 @@ d3.tsv(fileName, rowNatConverter, function(error, data) {
   }
 
 });
+
+/* map */
+
+
+var path = d3.geoPath();
+
+// Define projection property
+var projection = d3.geoConicConformal() // Lambert-93
+  .center([2.454071, 46.279229]) // Center on France
+  .scale(3000)
+  .translate([map_w / 2 - 50, map_h / 2]);
+
+path.projection(projection); // Assign projection to path object
+
+// Create the DIV that will contain our map
+var svg_map = root_map_div.append("svg")
+  .attr("id", "svgmap")
+  .attr("width", map_w)
+  .attr("height", map_h)
+  .attr("class", "YlOrRd");
+
+// Append the group that will contain our paths
+var deps = svg_map.append("g");
+
+// Load GeoJSON data and run a function for each entry
+d3.json(file_carte, function(req, fr) {
+  var features = deps
+    .selectAll("path")
+    .data(topojson.feature(fr, fr.objects.departements).features)
+    .enter()
+    .append("path")
+    .attr('id', function(d) {
+      return "d" + d.properties.code;
+    })
+    .attr("d", path);
+
+});
+
+// Append a DIV for the tooltip
+var div = root_map_div.append("div")
+  .attr("class", "tooltip")
+  .style("opacity", 0);
+
+
+var legend = svg_map.append('g')
+  .attr('transform', 'translate(525, 150)')
+  .attr('id', 'legend');
+
+legend.selectAll('.colorbar')
+  .data(d3.range(9))
+  .enter().append('svg:rect')
+  .attr('y', function(d) {
+    return d * 20 + 'px';
+  })
+  .attr('height', '20px')
+  .attr('width', '20px')
+  .attr('x', '0px')
+  .attr("class", function(d) {
+    return "q" + d + "-9";
+  });
+
+
+/* fonctions */
 
 function loadDerDataset(){
   dict ={} ;
@@ -91,6 +158,33 @@ function initDatasets(data){
 
   loadDerDataset();
 
+  /*
+   * dpts_by_year_name
+   *
+   */
+   dpts_by_year_name = {};
+   data.forEach(function (o){
+     var dpts_by_name = {}
+     var dpts = []
+     if(o.year in dpts_by_year_name){
+       dpts_by_name = dpts_by_year_name[o.year];
+     } else{
+       dpts_by_year_name[o.year] = dpts_by_name;
+     }
+     if(o.name in dpts_by_name){
+       dpts = dpts_by_name[o.name];
+     } else{
+       dpts_by_name[o.name] = dpts;
+     }
+     dpts.push({'department': o.department, 'n':o.n});
+   });
+
+  /*
+   * grp_by_year: total population par année
+   * par exemple
+   * grp_by_year[115] == {key: "2015", value: 604872}
+   *
+   */
   grp_by_year = d3.nest()
   .key(function(d){return d.year}).sortKeys(d3.ascending)
   .rollup(function (d){
@@ -102,6 +196,15 @@ function initDatasets(data){
     pop_by_year[d.key] = d.value;
   });
 
+  /*
+   * grp_by_year_sex_name: total population par année, sex, prénom
+   * par exemple: 78 -> 1978, 1 -> fille
+   * grp_by_year_sex_name[78].values[1].values[7].key == 'MARIE'
+   * grp_by_year_sex_name[78].values[1].values[7].value == 6065
+   *
+   * grp_by_year_sex_name[78].values[0].values[7] == {key: "FRÉDÉRIC", value: 10374, r: 27.856428827549315}
+   *
+   */
   grp_by_year_sex_name = d3.nest()
   .key(function(d){return d.year}).sortKeys(d3.ascending)
   .key(function(d){return d.sex}).sortKeys(d3.ascending)
@@ -110,12 +213,44 @@ function initDatasets(data){
     return d3.sum(d, function (d){return d.n;});
   }).entries(data);
 
+  /*
+  * naissances en 2015: prénom, nombre
+  * grp_by_year_name[115].values[5] == {key: "LOUISE", value: 4542, r: 19.555858192315345}
+  * grp_by_year_name[115].values[6] == {key: "ADAM", value: 4523, r: 19.51491249687156}
+  *
+   */
   grp_by_year_name = d3.nest()
   .key(function(d){return d.year}).sortKeys(d3.ascending)
   .key(function(d){return d.name}).sortKeys(d3.ascending)
   .rollup(function (d){
     return d3.sum(d, function (d){return d.n;});
   }).entries(data);
+
+
+  /*
+   * Nombre de naissances en 2015 à Paris
+   * grp_by_year_dept[115].values[74] == {key: "75", value: 37217}
+   *
+   */
+  grp_by_year_dept = d3.nest()
+    .key(function(d){return d.year}).sortKeys(d3.ascending)
+    .key(function(d){return d.department}).sortKeys(d3.ascending)
+    .rollup(function (d){
+      return d3.sum(d, function (d){return d.n;});
+    }).entries(data);
+
+  /*
+   * on convertit la structre en une map:
+   *  pop_by_year_dept[2015][75] == 37217
+   */
+  pop_by_year_dept = {};
+  grp_by_year_dept.forEach(function (o){
+    var pop_by_dept = {};
+    o.values.forEach(function (o2){
+      pop_by_dept[o2.key] = o2.value;
+    });
+    pop_by_year_dept[o.key] =pop_by_dept;
+  });
 
   grp_by_year_name.forEach(function (d){
     d.values.sort(function (a, b){
@@ -176,7 +311,7 @@ function update(){
     }
   }
   console.log("update:", "year:", year, "sex:", m);
-  draw(year, m);
+  drawBubble(year, m);
 }
 
 function addListener(){
@@ -225,7 +360,7 @@ function getTitle(d, pyear, psex){
   }
 }
 
-function draw(year, sex){
+function drawBubble(year, sex){
   year_idx = year - 1900;
   if( sex == 2){
     data_by_year = grp_by_year_name[year_idx].values;
@@ -301,6 +436,56 @@ function draw(year, sex){
 
 }
 
-function displayMap(name, year, sex){
-  console.log("name:", name, "year:", year, "sex:", sex);
+
+function displayMap(pname, pyear, psex){
+  console.log("displayMap: name:", pname, "year: ", pyear, "sex:", psex);
+
+  maxdpt = d3.max(d3.values(pop_by_year_dept[pyear]));
+
+    // Quantile scales map an input domain to a discrete range, 0...max(population) to 1...9
+    var quantile = d3.scaleQuantile()
+      // domaine: [0...maximum], maximum sur les départements
+      .domain([0, Math.sqrt(maxdpt)])
+      // .domain([0, Math.sqrt(d3.max(data, function(e) {
+      //   return +e.nombre;
+      // }))])
+      .range(d3.range(9));
+
+
+    var legendScale = d3.scaleSqrt()
+      .domain([0, maxdpt])
+      .range([0, 9 * 20]);
+
+    var legendAxis = svg_map.append("g")
+      .attr('transform', 'translate(550, 150)')
+      .call(d3.axisRight(legendScale).ticks(6));
+
+    dpts_by_year_name[pyear][pname].forEach(function(e, i) {
+      var tooltip = "<b>Département : </b>" + e.department + "<br>" + "<b>Naissances : </b>" + e.n + "<br>" +"<b>Proportion : </b>" + Number(Math.round((e.n*100/pop_by_year_dept[pyear][e.department])+'e2')+'e-2') + "<b>%</b>" + "<br>";
+
+      if (e.n > 0) {
+        var tooltip = tooltip + "<b>Prénom : </b>" + pname + "<br>" + "<b>Année : </b>" + pyear + "<br>";
+      }
+      d3.select("#d" + e.department)
+        .attr("class", function(d) {
+          return "department q" + quantile(Math.sqrt(+e.n)) + "-9";
+        })
+        .on("mouseover", function(d) {
+          div.transition()
+            .duration(200)
+            .style("opacity", .9);
+          div.html(tooltip)
+            .style("left", (d3.event.pageX + 30) + "px")
+            .style("top", (d3.event.pageY - 30) + "px");
+        })
+        .on("mouseout", function(d) {
+          div.transition()
+            .duration(500)
+            .style("opacity", 0);
+          div.html("")
+            .style("left", "0px")
+            .style("top", "0px");
+        });
+    });
+
 }
