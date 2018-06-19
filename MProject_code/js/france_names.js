@@ -226,8 +226,7 @@ function initDatasets(data){
     return d3.sum(d, function (d){return d.n;});
   }).entries(data);
 
-  pop_by_year_name = {}
-  grp_by_year_name
+
   /*
    * Nombre de naissances en 2015 à Paris
    * grp_by_year_dept[115].values[74] == {key: "75", value: 37217}
@@ -441,8 +440,7 @@ function drawBubble(year, sex){
 function displayMap(pname, pyear, psex){
   console.log("displayMap: name:", pname, "year: ", pyear, "sex:", psex);
 
-  maxdpt = d3.max(dpts_by_year_name[pyear][pname], d=>d.n);
-  console.log("displayMap: maxdpt:", maxdpt);
+  maxdpt = d3.max(d3.values(pop_by_year_dept[pyear]));
 
     // Quantile scales map an input domain to a discrete range, 0...max(population) to 1...9
     var quantile = d3.scaleQuantile()
@@ -463,7 +461,8 @@ function displayMap(pname, pyear, psex){
       .call(d3.axisRight(legendScale).ticks(6));
 
     dpts_by_year_name[pyear][pname].forEach(function(e, i) {
-      var tooltip = "<b>Département : </b>" + e.department + "<br>" + "<b>Naissances : </b>" + e.n + "<br>" +"<b>Proportion : </b>" + Number(Math.round((e.n*100/pop_by_year_dept[pyear][e.department])+'e2')+'e-2') + "<b>%</b>" + "<br>";
+      var tooltip = "<b>Département : </b>" + e.department + "<br>" + "<b>Naissances : </b>" + e.n + "<br>"
+          +"<b>Proportion : </b>" + Number(Math.round((e.n*100/pop_by_year_dept[pyear][e.department])+'e2')+'e-2') + "<b>%</b>" + "<br>";
 
       if (e.n > 0) {
         var tooltip = tooltip + "<b>Prénom : </b>" + pname + "<br>" + "<b>Année : </b>" + pyear + "<br>";
