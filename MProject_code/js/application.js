@@ -316,7 +316,8 @@ function update(){
 }
 
 function addListener(){
-    var slider_control = root_bubble_div.select("#year_range")
+    // var slider_control = root_bubble_div.select("#year_range")
+    var slider_control = d3.select("#right_top").select("#year_range")
     .on('change', (arguments) => {
       var slider = document.getElementById("year_range");
       year = slider.value
