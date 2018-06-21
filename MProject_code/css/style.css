@@ -1,26 +1,38 @@
-h1{
-  color: rgb(253,141,60);
+body {
+	background-image: url("../images/bebe.jpg");
+	background-repeat: no-repeat;
+	/*background-color: #92a8d1;;*/
 }
 
-text {
-  font: 10px sans-serif;
-  font-weight: bold;
-}
-#data{
-  color: rgb(49,163,84);
-}
-#interaction{
-  color: rgb(49, 130, 189);
+h1 {text-align:center; padding: 12px 20px; }
+h2 {font-size: 250%; padding :12px 20px;}
+#bubble { float:left; }
+#right_top {text-align:center;padding: 12px 20px;}
+#right_bottom { text-align:center;}
+
+input[type="range"] {
+    position: relative;
+    margin-left: 1em;
+    height: 65px;
+    width : 300px;
+    padding: 20px 30px;
+
 }
 
-#years {font-size: 17px;
-  font-weight: bold;
+input[type="range"]:after,
+input[type="range"]:before {
+    position: absolute;
+    top: 1em;
+    color: #aaa;
 }
 
-#menu {font-size: 17px;
-  font-weight: bold;
+input[type="range"]:before {
+    left:0em;
+    content: attr(min);
+}
+input[type="range"]:after {
+    right: 0em;
+    content: attr(max);
 }
 
-#select{
-  color: #AC63CC;
-}
+

@@ -1,16 +1,15 @@
-
 /* déclarations bubbles */
 var root_bubble_div = d3.select("#bubble")
-const bubble_w = 500;
-const bubble_h = 500;
+const bubble_w = 800;
+const bubble_h = 800;
 Stot = bubble_w * bubble_h
 b = 0.8
-seuil = 0.1
+seuil = 0.3
 var transitionDuration = 1000;
 
 /* déclarations map */
-var map_w = 700;
-var map_h = 550;
+var map_w = 300;
+var map_h = 300;
 var file_carte = "data/france.json"
 
 var root_map_div = d3.select("#francemap")
