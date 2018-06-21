@@ -3,13 +3,13 @@ var root_bubble_div = d3.select("#bubble")
 const bubble_w = 800;
 const bubble_h = 800;
 Stot = bubble_w * bubble_h
-b = 0.8
-seuil = 0.3
+b = 1.0
+seuil = 0.05
 var transitionDuration = 1000;
 
 /* déclarations map */
-var map_w = 300;
-var map_h = 300;
+var map_w = 400;
+var map_h = 350;
 var file_carte = "data/france.json"
 
 var root_map_div = d3.select("#francemap")
@@ -67,7 +67,7 @@ var path = d3.geoPath();
 // Define projection property
 var projection = d3.geoConicConformal() // Lambert-93
   .center([2.454071, 46.279229]) // Center on France
-  .scale(3000)
+  .scale(1725)
   .translate([map_w / 2 - 50, map_h / 2]);
 
 path.projection(projection); // Assign projection to path object
