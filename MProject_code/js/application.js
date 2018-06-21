@@ -351,9 +351,17 @@ function getColor(d,i, psex) {
 }
 
 function getTitle(d, pyear, psex){
-  // console.log("getTitle: year:", pyear, "sex:", psex, "d:", d);
+  console.log("getTitle: year:", pyear, "sex:", psex, "d:", d);
   try {
-    return d.key + " : " + d.value + "\n evolution compared to the previous year : " + dataset_der[d.key][pyear][psex].toFixed(2) ;
+    	if(psex == 0 || psex ==1){
+	  return d.key + " : " + d.value + "\n evolution compared to the previous year : " + dataset_der[d.key][pyear][psex].toFixed(2) ;
+	 } else{
+	if(0 in dataset_der[d.key][pyear]){
+	  return d.key + " : " + d.value + "\n evolution compared to the previous year : " + dataset_der[d.key][pyear][0].toFixed(2) ;
+	 }
+	if(1 in dataset_der[d.key][pyear]){
+	  return d.key + " : " + d.value + "\n evolution compared to the previous year : " + dataset_der[d.key][pyear][1].toFixed(2) ;
+	 }}
   }
   catch(TypeError){
     console.log("error getTilte:", d.key, "year: ", pyear, "sexe:", psex);
