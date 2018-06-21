@@ -3,13 +3,13 @@ var root_bubble_div = d3.select("#bubble")
 const bubble_w = 800;
 const bubble_h = 800;
 Stot = bubble_w * bubble_h
-b = 1.0
-seuil = 0.05
+b = 0.8
+seuil = 0.5
 var transitionDuration = 1000;
 
 /* déclarations map */
-var map_w = 400;
-var map_h = 350;
+var map_w = 300;
+var map_h = 300;
 var file_carte = "data/france.json"
 
 var root_map_div = d3.select("#francemap")
@@ -67,7 +67,7 @@ var path = d3.geoPath();
 // Define projection property
 var projection = d3.geoConicConformal() // Lambert-93
   .center([2.454071, 46.279229]) // Center on France
-  .scale(1725)
+  .scale(3000)
   .translate([map_w / 2 - 50, map_h / 2]);
 
 path.projection(projection); // Assign projection to path object
@@ -264,14 +264,16 @@ function initDatasets(data){
     //d.values.push({ key: 'FOURRETOUT', value: sum});
 
     d.values.forEach(function (d2){
-      d2.r = b * Math.sqrt(d2.value / pop_by_year[d.key] * Stot / Math.PI);
+      //d2.r = b * Math.sqrt(d2.value / pop_by_year[d.key] * Stot / Math.PI);
+      //d2.r = b * Math.sqrt(Stot * d2.value) / (Math.PI * seuil * pop_by_year[d.key])
+      d2.r = b * Math.sqrt((Math.PI * seuil * pop_by_year[d.key] * d2.value) / Stot);
     });
   });
+
   grp_by_year_name.forEach(function (d){
     d.values.sort(function (a, b){
       return - a.value + b.value;
     })});
-
 
   grp_by_year_sex_name.forEach(function (d_by_y){
     d_by_y.values.forEach(function (d_by_s){
@@ -286,7 +288,12 @@ function initDatasets(data){
 //      d_by_s.values.push({ key: 'FOURRETOUT', value: sum});
 
       d_by_s.values.forEach(function (d2){
-        d2.r = b * Math.sqrt(d2.value / pop_by_year[d_by_y.key] * Stot / Math.PI);
+        // d2.r = b * Math.sqrt(d2.value / pop_by_year[d_by_y.key] * Stot / Math.PI);
+        //d2.r = b * Math.sqrt(Stot * d2.value) / (Math.PI * seuil * pop_by_year[d_by_y.key]);
+        d2.r = b * Math.sqrt((Math.PI * seuil * pop_by_year[d_by_y.key] * d2.value) / Stot);
+        // FLE for debug
+        // console.log(d2.value + ", " + d2.r)
+
       });
       d_by_s.values.sort(function (a, b){
         return a.value - b.value < 0;
@@ -351,20 +358,12 @@ function getColor(d,i, psex) {
 }
 
 function getTitle(d, pyear, psex){
-  console.log("getTitle: year:", pyear, "sex:", psex, "d:", d);
+  // console.log("getTitle: year:", pyear, "sex:", psex, "d:", d);
   try {
-    	if(psex == 0 || psex ==1){
-	  return d.key + " : " + d.value + "\n evolution compared to the previous year : " + dataset_der[d.key][pyear][psex].toFixed(2) ;
-	 } else{
-	if(0 in dataset_der[d.key][pyear]){
-	  return d.key + " : " + d.value + "\n evolution compared to the previous year : " + dataset_der[d.key][pyear][0].toFixed(2) ;
-	 }
-	if(1 in dataset_der[d.key][pyear]){
-	  return d.key + " : " + d.value + "\n evolution compared to the previous year : " + dataset_der[d.key][pyear][1].toFixed(2) ;
-	 }}
+    return d.key + " : " + d.value + "\n evolution compared to the previous year : " + dataset_der[d.key][pyear][psex].toFixed(2) ;
   }
   catch(TypeError){
-    console.log("error getTilte:", d.key, "year: ", pyear, "sexe:", psex);
+    console.log("error getTitle:", d.key, "year: ", pyear, "sexe:", psex);
     return d.key + " : " + d.value  ;
   }
 }
