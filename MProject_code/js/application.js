@@ -385,13 +385,21 @@ function drawBubble(year, sex){
     });
 
   bubbleG_new.append("circle")
+    .attr("cx", function (d) {
+      return (Math.cos(Math.atan(d.y / d.x))) * bubble_w * Math.sqrt(2);
+    })
+    .attr("cy", function (d) {
+      return (Math.sin(Math.atan(d.y / d.x))) * bubble_h * Math.sqrt(2);
+      //return d.y * 50;
+    })
+    .attr("r", d => d.r)
+    .style("fill", (d, i) => getColor(d, i, sex))
     .transition()
     .ease(d3.easeCubicOut)
     .delay(function(d) { return Math.sqrt(d.x * d.x + d.y * d.y) * 10; })
     .attr("r", d => d.r)
     .attr("cx", d => d.x)
-    .attr("cy", d => d.y)
-    .style("fill", (d, i) => getColor(d, i, sex));
+    .attr("cy", d => d.y);
 
   bubbleG.select("circle")
     .transition()
@@ -404,6 +412,13 @@ function drawBubble(year, sex){
 
 
   bubbleG_new.append("text")
+    .attr("x", function (d) {
+      return (Math.cos(Math.atan(d.y / d.x))) * bubble_w * Math.sqrt(2);
+    })
+    .attr("y", function (d) {
+      return (Math.sin(Math.atan(d.y / d.x))) * bubble_h * Math.sqrt(2);
+      //return d.y * 50;
+    })
     .transition()
     .ease(d3.easeCubicOut)
     .delay(function(d) {
