@@ -266,7 +266,7 @@ function initDatasets(data){
     d.values.forEach(function (d2){
       //d2.r = b * Math.sqrt(d2.value / pop_by_year[d.key] * Stot / Math.PI);
       //d2.r = b * Math.sqrt(Stot * d2.value) / (Math.PI * seuil * pop_by_year[d.key])
-      d2.r = b * Math.sqrt((Math.PI * seuil * pop_by_year[d.key] * d2.value) / Stot);
+      d2.r = b * Math.sqrt((Stot * d2.value) / (Math.PI * seuil * pop_by_year[d.key]));
     });
   });
 
@@ -290,7 +290,7 @@ function initDatasets(data){
       d_by_s.values.forEach(function (d2){
         // d2.r = b * Math.sqrt(d2.value / pop_by_year[d_by_y.key] * Stot / Math.PI);
         //d2.r = b * Math.sqrt(Stot * d2.value) / (Math.PI * seuil * pop_by_year[d_by_y.key]);
-        d2.r = b * Math.sqrt((Math.PI * seuil * pop_by_year[d_by_y.key] * d2.value) / Stot);
+        d2.r = b * Math.sqrt((Stot * d2.value) / (Math.PI * seuil * pop_by_year[d_by_y.key]));
         // FLE for debug
         // console.log(d2.value + ", " + d2.r)
 
