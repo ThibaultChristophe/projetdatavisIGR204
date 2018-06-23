@@ -366,7 +366,7 @@ function getTitle(d, pyear, psex){
     console.log("error getTitle:", d.key, "year: ", pyear, "sexe:", psex);
     return d.key + " : " + d.value  ;
   }
-}
+}https://aws.amazon.com/fr/architecture/icons/
 
 function drawBubble(year, sex){
   year_idx = year - 1900;
@@ -386,23 +386,46 @@ function drawBubble(year, sex){
 
   bubbleG_new.append("circle")
     .attr("cx", function (d) {
-      return (Math.cos(Math.atan(d.y / d.x))) * bubble_w * Math.sqrt(2);
+      return (Math.cos(Math.atan2(d.y, d.x))) * bubble_w * Math.sqrt(2);
     })
     .attr("cy", function (d) {
-      return (Math.sin(Math.atan(d.y / d.x))) * bubble_h * Math.sqrt(2);
+      return (Math.sin(Math.atan2(d.y, d.x))) * bubble_h * Math.sqrt(2);
       //return d.y * 50;
     })
     .attr("r", d => d.r)
     .style("fill", (d, i) => getColor(d, i, sex))
-    .transition()
+    .transition().duration(transitionDuration)
     .ease(d3.easeCubicOut)
     .delay(function(d) { return Math.sqrt(d.x * d.x + d.y * d.y) * 10; })
-    .attr("r", d => d.r)
     .attr("cx", d => d.x)
-    .attr("cy", d => d.y);
+    .attr("cy", d => d.y)
+    .attr("r", d => d.r);
+
+  bubbleG_new.append("text")
+    .attr("x", function (d) {
+      return (Math.cos(Math.atan2(d.y, d.x))) * bubble_w * Math.sqrt(2);
+    })
+    .attr("y", function (d) {
+      return (Math.sin(Math.atan2(d.y, d.x))) * bubble_h * Math.sqrt(2);
+      //return d.y * 50;
+    })
+    .transition().duration(transitionDuration)
+    .ease(d3.easeCubicOut)
+    .delay(function(d) {
+      return Math.sqrt(d.x * d.x + d.y * d.y) * 10;
+    })
+    .attr("x", d=>d.x)
+    .attr("y", d=>d.y)
+    .text(d=>d.key)
+    .style("text-anchor", "middle")
+    .style("font-size", function(d) {
+      return Math.round(d.r / 3) + 'px';
+    });
+
+  bubbleG_new.append("title").text(d=> getTitle(d, year, sex));
 
   bubbleG.select("circle")
-    .transition()
+    .transition().duration(transitionDuration)
     .ease(d3.easeCubicOut)
     .delay(function(d) { return Math.sqrt(d.x * d.x + d.y * d.y) * 10; })
     .attr("r", d => d.r)
@@ -410,52 +433,29 @@ function drawBubble(year, sex){
     .attr("cy", d => d.y)
     .style("fill", (d, i) => getColor(d, i, sex));
 
-
-  bubbleG_new.append("text")
-    .attr("x", function (d) {
-      return (Math.cos(Math.atan(d.y / d.x))) * bubble_w * Math.sqrt(2);
-    })
-    .attr("y", function (d) {
-      return (Math.sin(Math.atan(d.y / d.x))) * bubble_h * Math.sqrt(2);
-      //return d.y * 50;
-    })
-    .transition()
+  bubbleG.select("text")
+    .transition().duration(transitionDuration)
     .ease(d3.easeCubicOut)
-    .delay(function(d) {
-      return Math.sqrt(d.x * d.x + d.y * d.y) * 10;
-    })
-    .attr("x", d=>d.x).attr("y", d=>d.y)
+    .delay(function(d) { return Math.sqrt(d.x * d.x + d.y * d.y) * 10; })
+    .attr("x", d=>d.x)
+    .attr("y", d=>d.y)
     .text(d=>d.key)
     .style("text-anchor", "middle")
     .style("font-size", function(d) {
       return Math.round(d.r / 3) + 'px';
     });
 
-    bubbleG.select("text")
-      .transition()
-      .ease(d3.easeCubicOut)
-      .delay(function(d) {
-        return Math.sqrt(d.x * d.x + d.y * d.y) * 10;
-      })
-      .attr("x", d=>d.x).attr("y", d=>d.y)
-      .text(d=>d.key)
-      .style("text-anchor", "middle")
-      .style("font-size", function(d) {
-        return Math.round(d.r / 3) + 'px';
-      });
-    bubbleG.exit().selectAll("circle")
-      .transition().ease(d3.easeCubicOut)
-      .duration(function(d) {
-        return 1/Math.sqrt(d.x * d.x + d.y * d.y) * 10;
-      })
-      .attr("r", "0")
-      .remove()
-    bubbleG.exit().selectAll("text").remove()
-    bubbleG.exit().selectAll("title").remove()
-    bubbleG.exit().remove()
+  bubbleG.select("title").text(d=> getTitle(d, year, sex));
 
-    bubbleG_new.append("title").text(d=> getTitle(d, year, sex));
-    bubbleG.select("title").text(d=> getTitle(d, year, sex));
+  bubbleG.exit().selectAll("circle")
+    .transition()//.ease(d3.easeCubicOut)
+    .duration(transitionDuration)
+    .attr("r", "0")
+
+  bubbleG.exit().selectAll("text").transition().delay(transitionDuration).remove()
+  bubbleG.exit().selectAll("circle").transition().delay(transitionDuration).remove()
+  bubbleG.exit().selectAll("title").transition().delay(transitionDuration).remove()
+  bubbleG.exit().transition().delay(transitionDuration).remove()
 
 }
 
