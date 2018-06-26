@@ -310,8 +310,6 @@ grp_by_year_sex_name.forEach(function(o){
     //d.values.push({ key: 'FOURRETOUT', value: sum});
 
     d.values.forEach(function (d2){
-      //d2.r = b * Math.sqrt(d2.value / pop_by_year[d.key] * Stot / Math.PI);
-      //d2.r = b * Math.sqrt(Stot * d2.value) / (Math.PI * seuil * pop_by_year[d.key])
       d2.r = b * Math.sqrt((Stot * d2.value) / (Math.PI * seuil * pop_by_year[d.key]));
     });
   });
@@ -334,11 +332,7 @@ grp_by_year_sex_name.forEach(function(o){
 //      d_by_s.values.push({ key: 'FOURRETOUT', value: sum});
 
       d_by_s.values.forEach(function (d2){
-        // d2.r = b * Math.sqrt(d2.value / pop_by_year[d_by_y.key] * Stot / Math.PI);
-        //d2.r = b * Math.sqrt(Stot * d2.value) / (Math.PI * seuil * pop_by_year[d_by_y.key]);
         d2.r = b2 * Math.sqrt((Stot * d2.value) / (Math.PI * seuil * pop_by_year[d_by_y.key]));
-        // FLE for debug
-        // console.log(d2.value + ", " + d2.r)
 
       });
       d_by_s.values.sort(function (a, b){
@@ -391,19 +385,23 @@ function getColor(d,i, psex) {
     if(psex ==2){
       if( 0 in dataset_der[d.key][year]){
         v = dataset_der[d.key][year][0];
-	if(!isNaN(v)){
+	if(!isNaN(v) && v!==undefined){
         	scalar += v
 	}
       }
       if( 1 in dataset_der[d.key][year]){
         v = dataset_der[d.key][year][1];
-	if(!isNaN(v)){
+	if(!isNaN(v) && v!=undefined){
         	scalar += v
 	}
       }
     } else{
       scalar = dataset_der[d.key][year][psex];
     }
+	  if(scalar == undefined){
+console.log("getColor, name:", d.key, "color:", clr, "scalar:", scalar)
+		  return color(0)
+	  }
     clr = color (scalar);
     return clr
   }
