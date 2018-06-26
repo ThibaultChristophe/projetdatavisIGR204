@@ -238,16 +238,18 @@ grp_by_year_sex_name.forEach(function(o){
 	by_s_by_n = {}
 	by_s_by_n[0] = {}
 	by_s_by_n[1] = {}
+	by_s_by_n[2] = {}
 	o.values[0].values.forEach(function (o2){
-		// console.log("o2:", o2)
 		by_s_by_n[0][o2.key] = o2.value
+		by_s_by_n[2][o2.key] = o2.value
 	});
 	o.values[1].values.forEach(function (o2){
-		// console.log("o2:", o2)
 		by_s_by_n[1][o2.key] = o2.value
+		by_s_by_n[2][o2.key] = o2.value
 	});
 	pop_by_year_sex_name[o.key] = by_s_by_n
 });
+
 
   /*
   * naissances en 2015: prénom, nombre
