@@ -7,6 +7,7 @@ b = 0.15
 b2 = 0.20
 seuil = 0.05
 var transitionDuration = 1000;
+var prenom = "PIERRE"
 
 /* déclarations map */
 var map_w = 400;
@@ -359,6 +360,7 @@ function update(){
   }
   console.log("update:", "year:", year, "sex:", m);
   drawBubble(year, m);
+  displayMap(prenom, year, m);
 }
 
 function addListener(){
@@ -431,7 +433,8 @@ function drawBubble(year, sex){
   bubbleG = svgbubble.selectAll("g").data(data_by_year, function (d){ return d.key; })
   bubbleG_new = bubbleG.enter().append("g")
     .on("click", function (d){
-      displayMap(d.key, year, sex);
+      prenom = d.key;
+      displayMap(prenom, year, sex);
     });
 
   bubbleG_new.append("circle")
@@ -511,7 +514,7 @@ function drawBubble(year, sex){
 
 
 function displayMap(pname, pyear, psex){
-  
+
 	d3.select("#francemap").attr("style", "display:block")
   console.log("displayMap: name:", pname, "year: ", pyear, "sex:", psex);
 
