@@ -195,6 +195,26 @@ function initDatasets(data){
     pop_by_year[d.key] = d.value;
   });
 
+  grp_by_year_sex = d3.nest()
+  .key(function(d){return d.year}).sortKeys(d3.ascending)
+  .key(function(d){return d.sex}).sortKeys(d3.ascending)
+  .rollup(function (d){
+    return d3.sum(d, function (d){return d.n;});
+  }).entries(data);
+
+
+	pop_by_year_sex = {}
+
+grp_by_year_sex.forEach(function (o){
+	obj = {}
+	popM = o.values[0].value
+	popF = o.values[1].value
+	obj[0] = popM
+	obj[1] = popF
+	obj[2] = popM + popF
+	pop_by_year_sex[o.key]=obj
+});
+
   /*
    * grp_by_year_sex_name: total population par année, sex, prénom
    * par exemple: 78 -> 1978, 1 -> fille
