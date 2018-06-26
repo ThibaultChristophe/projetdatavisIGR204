@@ -8,8 +8,8 @@ seuil = 0.05
 var transitionDuration = 1000;
 
 /* déclarations map */
-var map_w = 300;
-var map_h = 300;
+var map_w = 400;
+var map_h = 350;
 var file_carte = "data/france.json"
 
 var root_map_div = d3.select("#francemap")
@@ -18,8 +18,11 @@ var root_map_div = d3.select("#francemap")
 
 /* bubble */
 color = d3.scaleLinear()
-  .domain([-2,-1.5, -1, -0.5, 0, 0.5,2])
-  .range([  "#14BEDF","#72CBDD","#B6D7DE","#B6D7DE","#E3C5D8","#D371AE ","#92035C"])
+  //.domain([-2,-1.5, -1, -0.5, 0, 0.5,2])
+  //.range([  "#14BEDF","#72CBDD","#B6D7DE","#B6D7DE","#E3C5D8","#D371AE ","#92035C"])
+  .domain([-20, -2,-1.5, -1, -0.5, 0, 0.5,2, 20])
+  .range([  "#0000FF", "#14BEDF","#72CBDD","#B6D7DE","#B6D7DE","#E3C5D8","#D371AE ","#92035C",
+  	"#FF0000"])
   .interpolate(d3.interpolateHcl);
 
 addListener()
@@ -67,7 +70,7 @@ var path = d3.geoPath();
 // Define projection property
 var projection = d3.geoConicConformal() // Lambert-93
   .center([2.454071, 46.279229]) // Center on France
-  .scale(3000)
+  .scale(1750)
   .translate([map_w / 2 - 50, map_h / 2]);
 
 path.projection(projection); // Assign projection to path object
@@ -377,16 +380,22 @@ function addListener(){
   }
 
 function getColor(d,i, psex) {
+      scalar = 0
   if (year == 1900) {
     return "#F2DAE9";
   } else {
     if(psex ==2){
-      scalar = 0
       if( 0 in dataset_der[d.key][year]){
-        scalar += dataset_der[d.key][year][0];
+        v = dataset_der[d.key][year][0];
+	if(!isNaN(v)){
+        	scalar += v
+	}
       }
       if( 1 in dataset_der[d.key][year]){
-        scalar += dataset_der[d.key][year][1];
+        v = dataset_der[d.key][year][1];
+	if(!isNaN(v)){
+        	scalar += v
+	}
       }
     } else{
       scalar = dataset_der[d.key][year][psex];
@@ -402,10 +411,10 @@ function getTitle(d, pyear, psex){
     return d.key + " : " + d.value + "\n evolution compared to the previous year : " + dataset_der[d.key][pyear][psex].toFixed(2) ;
   }
   catch(TypeError){
-    console.log("error getTitle:", d.key, "year: ", pyear, "sexe:", psex);
+    // console.log("error getTitle:", d.key, "year: ", pyear, "sexe:", psex);
     return d.key + " : " + d.value  ;
   }
-}https://aws.amazon.com/fr/architecture/icons/
+}
 
 function drawBubble(year, sex){
   year_idx = year - 1900;
