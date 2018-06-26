@@ -4,7 +4,7 @@ const bubble_w = 800;
 const bubble_h = 800;
 Stot = bubble_w * bubble_h
 b = 0.8
-seuil = 0.5
+seuil = 0.05
 var transitionDuration = 1000;
 
 /* déclarations map */
@@ -231,6 +231,23 @@ grp_by_year_sex.forEach(function (o){
   .rollup(function (d){
     return d3.sum(d, function (d){return d.n;});
   }).entries(data);
+
+pop_by_year_sex_name = {}
+
+grp_by_year_sex_name.forEach(function(o){
+	by_s_by_n = {}
+	by_s_by_n[0] = {}
+	by_s_by_n[1] = {}
+	o.values[0].values.forEach(function (o2){
+		// console.log("o2:", o2)
+		by_s_by_n[0][o2.key] = o2.value
+	});
+	o.values[1].values.forEach(function (o2){
+		// console.log("o2:", o2)
+		by_s_by_n[1][o2.key] = o2.value
+	});
+	pop_by_year_sex_name[o.key] = by_s_by_n
+});
 
   /*
   * naissances en 2015: prénom, nombre
