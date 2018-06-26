@@ -3,7 +3,8 @@ var root_bubble_div = d3.select("#bubble")
 const bubble_w = 800;
 const bubble_h = 800;
 Stot = bubble_w * bubble_h
-b = 0.8
+b = 0.15
+b2 = 0.20
 seuil = 0.05
 var transitionDuration = 1000;
 
@@ -14,6 +15,9 @@ var file_carte = "data/france.json"
 
 var root_map_div = d3.select("#francemap")
 
+
+// au départ on n'affiche pas la carte toute noire. Elle sera affichée une bonne fois pour toute la première fois
+d3.select("#francemap").attr("style", "display:none")
 
 
 /* bubble */
@@ -332,7 +336,7 @@ grp_by_year_sex_name.forEach(function(o){
       d_by_s.values.forEach(function (d2){
         // d2.r = b * Math.sqrt(d2.value / pop_by_year[d_by_y.key] * Stot / Math.PI);
         //d2.r = b * Math.sqrt(Stot * d2.value) / (Math.PI * seuil * pop_by_year[d_by_y.key]);
-        d2.r = b * Math.sqrt((Stot * d2.value) / (Math.PI * seuil * pop_by_year[d_by_y.key]));
+        d2.r = b2 * Math.sqrt((Stot * d2.value) / (Math.PI * seuil * pop_by_year[d_by_y.key]));
         // FLE for debug
         // console.log(d2.value + ", " + d2.r)
 
@@ -509,6 +513,8 @@ function drawBubble(year, sex){
 
 
 function displayMap(pname, pyear, psex){
+  
+	d3.select("#francemap").attr("style", "display:block")
   console.log("displayMap: name:", pname, "year: ", pyear, "sex:", psex);
 
   maxdpt = d3.max(dpts_by_year_name[pyear][pname], d=>d.n);
