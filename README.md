@@ -13,6 +13,6 @@ python3 -m http.server
 http://localhost:8000/ (ou autre port à la place du 8000)
 ```
 
-* choisir index.html (fonctionne avec le csv newCSV.csv (data) et le json (coordonnées France))
+* choisir index.html (fonctionne avec les deux fichiers csv (data) et le json (coordonnées France))
 
 * le fichier index.html est lié avec les fichiers suivants : css/carte-de-france.css et css/style.css, js/application.js ainsi que d3.js
