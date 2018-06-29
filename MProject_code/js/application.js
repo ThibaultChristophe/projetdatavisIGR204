@@ -27,7 +27,7 @@ color = d3.scaleLinear()
   //.range([  "#14BEDF","#72CBDD","#B6D7DE","#B6D7DE","#E3C5D8","#D371AE ","#92035C"])
   .domain([-20, -2,-1.5, -1, -0.5, 0, 0.5,2, 20])
   .range([  "#0000FF", "#14BEDF","#72CBDD","#B6D7DE","#B6D7DE","#E3C5D8","#D371AE ","#92035C",
-  	"#FF0000"])
+  	"#7a0143"])
   .interpolate(d3.interpolateHcl);
 
 addListener()
